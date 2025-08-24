@@ -13,7 +13,7 @@ int main()
 	while(1)
 	{
 		// Event Driven Section
-		
+		printf("Hello World!\r\n");
 
 		// Time Slice Polling Section
 		if(sysTick_DelayMs(&taskDelayer1, 500)){
