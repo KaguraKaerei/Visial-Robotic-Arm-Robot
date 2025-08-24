@@ -9,10 +9,9 @@
 #include "sysTick.h"
 #include "DWT.h"
 // Driver Layer
-#include "Delay.h"
-#include "LOG.h"
+#include "Delay_d.h"
 // Service Layer
-
+#include "LOG_s.h"
 // Application Layer
 
 // Volatile Flags Definition

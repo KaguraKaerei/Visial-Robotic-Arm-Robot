@@ -1,5 +1,5 @@
-#ifndef _Delay_h_
-#define _Delay_h_
+#ifndef _Delay_d_h_
+#define _Delay_d_h_
 
 #include "stm32f10x.h"
 #include "sysTick.h"
