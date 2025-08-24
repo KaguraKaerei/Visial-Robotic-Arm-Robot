@@ -1,0 +1,40 @@
+.\objects\board.o: src\main\board.c
+.\objects\board.o: src\main\board.h
+.\objects\board.o: src\main\main.h
+.\objects\board.o: .\lib\Start\stm32f10x.h
+.\objects\board.o: .\lib\Start\core_cm3.h
+.\objects\board.o: D:\Keil 5--C51\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\board.o: .\lib\Start\system_stm32f10x.h
+.\objects\board.o: .\lib\User\stm32f10x_conf.h
+.\objects\board.o: .\lib\Library\stm32f10x_adc.h
+.\objects\board.o: .\lib\Start\stm32f10x.h
+.\objects\board.o: .\lib\Library\stm32f10x_bkp.h
+.\objects\board.o: .\lib\Library\stm32f10x_can.h
+.\objects\board.o: .\lib\Library\stm32f10x_cec.h
+.\objects\board.o: .\lib\Library\stm32f10x_crc.h
+.\objects\board.o: .\lib\Library\stm32f10x_dac.h
+.\objects\board.o: .\lib\Library\stm32f10x_dbgmcu.h
+.\objects\board.o: .\lib\Library\stm32f10x_dma.h
+.\objects\board.o: .\lib\Library\stm32f10x_exti.h
+.\objects\board.o: .\lib\Library\stm32f10x_flash.h
+.\objects\board.o: .\lib\Library\stm32f10x_fsmc.h
+.\objects\board.o: .\lib\Library\stm32f10x_gpio.h
+.\objects\board.o: .\lib\Library\stm32f10x_i2c.h
+.\objects\board.o: .\lib\Library\stm32f10x_iwdg.h
+.\objects\board.o: .\lib\Library\stm32f10x_pwr.h
+.\objects\board.o: .\lib\Library\stm32f10x_rcc.h
+.\objects\board.o: .\lib\Library\stm32f10x_rtc.h
+.\objects\board.o: .\lib\Library\stm32f10x_sdio.h
+.\objects\board.o: .\lib\Library\stm32f10x_spi.h
+.\objects\board.o: .\lib\Library\stm32f10x_tim.h
+.\objects\board.o: .\lib\Library\stm32f10x_usart.h
+.\objects\board.o: .\lib\Library\stm32f10x_wwdg.h
+.\objects\board.o: .\lib\Library\misc.h
+.\objects\board.o: D:\Keil 5--C51\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\board.o: D:\Keil 5--C51\ARM\ARMCC\Bin\..\include\string.h
+.\objects\board.o: src\main\board.h
+.\objects\board.o: .\src\app\UART.h
+.\objects\board.o: .\src\app\Delay.h
+.\objects\board.o: .\src\app\Encoder.h
+.\objects\board.o: .\src\main\main.h
+.\objects\board.o: .\src\app\PID.h
