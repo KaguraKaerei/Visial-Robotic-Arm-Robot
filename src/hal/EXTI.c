@@ -1,6 +1,6 @@
 #include "EXTI.h"
 
-void EXTI_Init(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin_x)
+void iEXTI_Init(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin_x)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
     EXTI_InitTypeDef EXTI_InitStructure;
@@ -37,7 +37,7 @@ void EXTI_Init(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin_x)
     EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
     EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
     EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-    EXTI_Init(GPIOx, GPIO_Pin_x);
+    EXTI_Init(&EXTI_InitStructure);
 
     NVIC_InitTypeDef NVIC_InitStructure;
     if(GPIO_PinSource <= 4){
