@@ -10,7 +10,7 @@
   * @note   2：打印错误和警告日志
   * @note   3：打印所有日志
   */
-#define LOG_DEBUG 2
+#define LOG_DEBUG 3
 
 void _INFO(const char* format, ...) __attribute__((format(printf, 1, 2)));
 void _WARN(const char* format, ...) __attribute__((format(printf, 1, 2)));

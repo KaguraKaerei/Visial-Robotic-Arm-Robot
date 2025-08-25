@@ -31,8 +31,8 @@ int main()
 void Board_Init(void)
 {
 	// Initialize the hardware abstraction layer
-	UART_Init();
-	Timer_Init();
+	UART_Init(iUSART1, USART_MODE_BASIC);
+	Timer_Init(iTIM2, TIM_MODE_PWM);
 	GPIO_I2C_Init();
 	sysTick_Init();
 	// Initialize the driver layer

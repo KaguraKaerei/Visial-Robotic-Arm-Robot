@@ -4,8 +4,18 @@
 #include "stm32f10x.h"
 #include <stdio.h>
 
-#define uart1_board	115200
+typedef enum{
+    iUSART1,
+    iUSART2,
+    iUSART3
+} iUSART_t;
+typedef enum{
+    USART_MODE_BASIC,
+    USART_MODE_HALF_DUPLEX
+} USART_Mode_t;
+typedef void(* USART_Callback_t)(void);
 
-void UART_Init(void);
+void UART_Init(iUSART_t USART, USART_Mode_t mode);
+void USART_RegisterCallback(iUSART_t USART, USART_Callback_t callback);
 
 #endif

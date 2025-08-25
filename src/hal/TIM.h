@@ -3,10 +3,21 @@
 
 #include "stm32f10x.h"
 
-#define TIM3_PERIOD 10000-1
-#define TIM3_PRESCALER 7200-1
+typedef enum{
+    iTIM1,
+    iTIM2,
+    iTIM3,
+    iTIM4
+} iTIM_t;
+typedef enum{
+    TIM_MODE_BASIC,
+    TIM_MODE_PWM,
+    TIM_MODE_IC,
+    TIM_MODE_ENCODER
+} TIM_Mode_t;
+typedef void(* TIM_Callback_t)(void);
 
-void Timer_Init(void);
-void TIM3_RegisterCallback(void(* callback)(void));
+void Timer_Init(iTIM_t TIM, TIM_Mode_t mode);
+void TIM_RegisterCallback(iTIM_t TIM, TIM_Callback_t callback);
 
 #endif
