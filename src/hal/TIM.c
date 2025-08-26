@@ -30,6 +30,8 @@ static TIM_Callback_t TIM3_Callback = 0;
 static TIM_Callback_t TIM4_Callback = 0;
 /**
   * @brief 定时器硬件初始化
+  * @param TIMx 定时器选择
+  * @param mode 定时器模式
   */
 void Timer_Init(iTIM_t TIMx, TIM_Mode_t mode)
 {

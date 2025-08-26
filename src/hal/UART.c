@@ -20,6 +20,8 @@ static USART_Callback_t UART2_Callback = 0;
 static USART_Callback_t UART3_Callback = 0;
 /**
   * @brief 串口硬件初始化 
+  * @param USART 串口选择
+  * @param mode 串口模式
   */
 void UART_Init(iUSART_t USART, USART_Mode_t mode)
 {
