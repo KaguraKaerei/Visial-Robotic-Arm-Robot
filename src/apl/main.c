@@ -1,44 +1,31 @@
 #include "main.h"
 
+// 时间片定义
+static sysTick_t taskDelayer1 = 0;
+static sysTick_t taskDelayer2 = 0; 
+static sysTick_t taskDelayer3 = 0;
+
 int main()
 {
-	// Initialize the board
-	Board_Init();
-
-	// Time Slice Definition
-	static sysTick_t taskDelayer1 = 0;
-	static sysTick_t taskDelayer2 = 0; 
-    static sysTick_t taskDelayer3 = 0;
+    SysManager_Init();
 
 	while(1)
 	{
-		// Event Driven Section
-		
+		// 状态机驱动部分
+		SysManager_Process();
+        if(System_Is_Ready()){
 
-		// Time Slice Polling Section
-		if(sysTick_DelayMs(&taskDelayer1, 500)){
-			_INFO("0.5s");
-		}
+        }
+
+		// 时间片轮转部分
+		if(sysTick_DelayMs(&taskDelayer1, 100)){
+
+        }
 		if(sysTick_DelayMs(&taskDelayer2, 1000)){
-			_WARN("1s");
-		}
+            _INFO("1s");
+        }
         if(sysTick_DelayMs(&taskDelayer3, 2000)){
-			_ERROR("2s");
-		}
+
+        }
 	}
-}
-
-void Board_Init(void)
-{
-	// Initialize the hardware abstraction layer
-	UART_Init(iUSART1, USART_MODE_BASIC);
-	Timer_Init(iTIM2, TIM_MODE_PWM);
-	GPIO_I2C_Init();
-	sysTick_Init();
-	// Initialize the driver layer
-	
-	// Initialize the service layer
-
-	// Initialize the application layer
-
 }

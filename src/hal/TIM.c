@@ -33,7 +33,7 @@ static TIM_Callback_t TIM4_Callback = 0;
   * @param TIMx 定时器选择
   * @param mode 定时器模式
   */
-void Timer_Init(iTIM_t TIMx, TIM_Mode_t mode)
+void iTIM_Init(iTIM_t TIMx, TIM_Mode_t mode)
 {
     // 定时器及模式选择
     const TIM_Config_t* config = 0;
@@ -112,14 +112,16 @@ void Timer_Init(iTIM_t TIMx, TIM_Mode_t mode)
 
     }
     // NVIC配置
-    TIM_ClearFlag(config->TIMx, TIM_IT_Update);
-    TIM_ITConfig(config->TIMx, TIM_IT_Update, ENABLE);
-    NVIC_InitTypeDef NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel = config->IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
-    NVIC_Init(&NVIC_InitStructure);
+    if(config->Mode != TIM_MODE_PWM){
+        TIM_ClearFlag(config->TIMx, TIM_IT_Update);
+        TIM_ITConfig(config->TIMx, TIM_IT_Update, ENABLE);
+        NVIC_InitTypeDef NVIC_InitStructure;
+        NVIC_InitStructure.NVIC_IRQChannel = config->IRQn;
+        NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+        NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+        NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+        NVIC_Init(&NVIC_InitStructure);
+    }
     // 启动定时器
     TIM_Cmd(config->TIMx, ENABLE);
 }

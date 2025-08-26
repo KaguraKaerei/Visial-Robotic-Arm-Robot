@@ -23,7 +23,7 @@ static USART_Callback_t UART3_Callback = 0;
   * @param USART 串口选择
   * @param mode 串口模式
   */
-void UART_Init(iUSART_t USART, USART_Mode_t mode)
+void iUSART_Init(iUSART_t USART, USART_Mode_t mode)
 {
     // 串口及模式选择
     const USART_Config_t* config = 0;

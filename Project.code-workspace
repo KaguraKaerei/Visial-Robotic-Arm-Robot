@@ -4,6 +4,10 @@
             "path": "."
         }
     ],
-    "settings": {},
+    "settings": {
+        "files.associations": {
+            "gpio_i2c.h": "c"
+        }
+    },
     "extensions": {}
 }

@@ -15,7 +15,7 @@ typedef enum{
 } USART_Mode_t;
 typedef void(* USART_Callback_t)(void);
 
-void UART_Init(iUSART_t USART, USART_Mode_t mode);
+void iUSART_Init(iUSART_t USART, USART_Mode_t mode);
 void USART_RegisterCallback(iUSART_t USART, USART_Callback_t callback);
 
 #endif
