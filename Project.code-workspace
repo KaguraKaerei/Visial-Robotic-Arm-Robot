@@ -6,7 +6,10 @@
     ],
     "settings": {
         "files.associations": {
-            "gpio_i2c.h": "c"
+            "gpio_i2c.h": "c",
+            "main.h": "c",
+            "sysmanager_a.h": "c",
+            "log_s.h": "c"
         }
     },
     "extensions": {}

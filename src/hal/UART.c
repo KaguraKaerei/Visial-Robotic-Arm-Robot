@@ -1,4 +1,5 @@
 #include "UART.h"
+#include <stdarg.h>
 
 /* 串口初始化配置表 */
 typedef struct{
@@ -14,6 +15,8 @@ const USART_Config_t USART_Config[] = {
     {iUSART2, USART_MODE_BASIC, RCC_APB1Periph_USART2, USART2, USART2_IRQn, 115200},
     {iUSART3, USART_MODE_HALF_DUPLEX, RCC_APB1Periph_USART3, USART3, USART3_IRQn, 115200}
 };
+/* 私有函数声明 */
+static void USART_SendString(USART_TypeDef* USARTx, const char* str);
 /* 中断回调函数指针 */
 static USART_Callback_t UART1_Callback = 0;
 static USART_Callback_t UART2_Callback = 0;
@@ -138,6 +141,36 @@ void USART_RegisterCallback(iUSART_t USART, USART_Callback_t callback)
             UART3_Callback = callback;
             break;
         }
+    }
+}
+/**
+ * @brief 格式化打印（阻塞方式）
+ * @param USARTx 串口外设
+ * @param format 格式化字符串
+ * @param ... 其他参数
+ */
+void USART_Printf(USART_TypeDef* USARTx, const char* format, ...)
+{
+    char buffer[256];
+    va_list args;
+
+    va_start(args, format);
+    vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+
+    USART_SendString(USARTx, buffer);
+}
+/**
+ * @brief 发送字符串（阻塞方式）
+ * @param USARTx 串口外设
+ * @param str 要发送的字符串
+ */
+static void USART_SendString(USART_TypeDef* USARTx, const char* str)
+{
+    while(*str)
+    {
+        USART_SendData(USARTx, (uint8_t)*str++);
+        while(USART_GetFlagStatus(USARTx, USART_FLAG_TXE) == RESET);
     }
 }
 /**

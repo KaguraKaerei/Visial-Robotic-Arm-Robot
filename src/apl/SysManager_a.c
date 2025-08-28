@@ -1,4 +1,4 @@
-#include "SysManager.h"
+#include "SysManager_a.h"
 
 // 私有变量
 static SysState_t sysState = SYS_STATE_INIT;
@@ -12,6 +12,7 @@ static bool SysCheck_EXTI(void);
 static bool SysCheck_I2C(void);
 static bool SysCheck_SYSTICK(void);
 static bool SysCheck_DWT(void);
+static bool SysCheck_CHASSIS(void);
 
 /**
  * @brief 系统管理器初始化函数
@@ -24,14 +25,8 @@ void SysManager_Init(void)
         sysCheckResults[i] = false;
     }
 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
-    GPIO_InitTypeDef GPIO_InitStructure;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-    GPIO_Init(GPIOC, &GPIO_InitStructure);
-
-    GPIO_ResetBits(GPIOC, GPIO_Pin_13);
+    LED_Init();
+    LED_On();
 }
 /**
  * @brief 系统管理器进程函数
@@ -45,7 +40,7 @@ void SysManager_Process(void)
             break;
         case SYS_STATE_READY:
             _INFO("System Ready!");
-            GPIO_SetBits(GPIOC, GPIO_Pin_13);
+            LED_Off();
             sysState = SYS_STATE_RUNNING;
             break;
         case SYS_STATE_RUNNING:
@@ -69,7 +64,7 @@ bool System_Is_Ready(void)
 /**
  * @brief 系统初始化函数
  */
-void SysInit(void)
+static void SysInit(void)
 {
     bool(* checkFunctions[SYS_CHECK_MAX])(void) = {
         SysCheck_USART,
@@ -77,10 +72,11 @@ void SysInit(void)
         SysCheck_EXTI,
         SysCheck_I2C,
         SysCheck_SYSTICK,
-        SysCheck_DWT
+        SysCheck_DWT,
+        SysCheck_CHASSIS
     };
     const char* checkNames[SYS_CHECK_MAX] = {
-        "USART", "TIM", "EXTI", "I2C", "SYSTICK", "DWT"
+        "USART", "TIM", "EXTI", "I2C", "SYSTICK", "DWT", "CHASSIS"
     };
     
     for( ; sysCheck < SYS_CHECK_MAX; ++sysCheck){
@@ -97,7 +93,7 @@ void SysInit(void)
     _INFO("All System Checks Passed");
 }
 
-bool SysCheck_USART(void)
+static bool SysCheck_USART(void)
 {
     iUSART_Init(iUSART1, USART_MODE_BASIC);
     // USART_RegisterCallback();
@@ -109,7 +105,7 @@ bool SysCheck_USART(void)
     return true;
 }
 
-bool SysCheck_TIM(void)
+static bool SysCheck_TIM(void)
 {
     iTIM_Init(iTIM2, TIM_MODE_BASIC);
     // TIM_RegisterCallback();
@@ -126,7 +122,7 @@ bool SysCheck_TIM(void)
     return true;
 }
 
-bool SysCheck_EXTI(void)
+static bool SysCheck_EXTI(void)
 {
     iEXTI_Init(GPIOA, GPIO_Pin_0, GPIO_Mode_IN_FLOATING, EXTI_Trigger_Rising);
     // EXTI_RegisterCallback();
@@ -151,14 +147,14 @@ bool SysCheck_EXTI(void)
     return true;
 }
 
-bool SysCheck_I2C(void)
+static bool SysCheck_I2C(void)
 {
 	GPIO_I2C_Init();
 
     return true;
 }
 
-bool SysCheck_SYSTICK(void)
+static bool SysCheck_SYSTICK(void)
 {
 	sysTick_Init();
 
@@ -174,7 +170,7 @@ bool SysCheck_SYSTICK(void)
     return true;
 }
 
-bool SysCheck_DWT(void)
+static bool SysCheck_DWT(void)
 {
     DWT_Init();
 
@@ -186,6 +182,13 @@ bool SysCheck_DWT(void)
         _ERROR("DWT CYCCNT Not Enabled");
         return false;
     }
+
+    return true;
+}
+
+static bool SysCheck_CHASSIS(void)
+{
+    Chassis_Init();
 
     return true;
 }

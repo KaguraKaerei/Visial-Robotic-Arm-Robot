@@ -17,5 +17,6 @@ typedef void(* USART_Callback_t)(void);
 
 void iUSART_Init(iUSART_t USART, USART_Mode_t mode);
 void USART_RegisterCallback(iUSART_t USART, USART_Callback_t callback);
+void USART_Printf(USART_TypeDef* USARTx, const char* format, ...);
 
 #endif
