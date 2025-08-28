@@ -13,7 +13,7 @@ typedef struct{
 const USART_Config_t USART_Config[] = {
     {iUSART1, USART_MODE_BASIC, RCC_APB2Periph_USART1, USART1, USART1_IRQn, 115200},
     {iUSART2, USART_MODE_BASIC, RCC_APB1Periph_USART2, USART2, USART2_IRQn, 115200},
-    {iUSART3, USART_MODE_HALF_DUPLEX, RCC_APB1Periph_USART3, USART3, USART3_IRQn, 115200}
+    {iUSART3, USART_MODE_BASIC, RCC_APB1Periph_USART3, USART3, USART3_IRQn, 115200}
 };
 /* 私有函数声明 */
 static void USART_SendString(USART_TypeDef* USARTx, const char* str);
@@ -95,7 +95,10 @@ void iUSART_Init(iUSART_t USART, USART_Mode_t mode)
         }
     }
     // USART初始化配置
-    RCC_APB2PeriphClockCmd(config->RCC_Periph, ENABLE);
+    if(config->USART == iUSART1)
+        RCC_APB2PeriphClockCmd(config->RCC_Periph, ENABLE);
+    else
+        RCC_APB1PeriphClockCmd(config->RCC_Periph, ENABLE);
     USART_InitTypeDef USART_InitStructure;
     USART_InitStructure.USART_BaudRate = config->BaudRate;
     USART_InitStructure.USART_WordLength = USART_WordLength_8b;

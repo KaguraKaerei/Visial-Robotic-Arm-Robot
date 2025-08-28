@@ -1,4 +1,4 @@
-#include "Chassis_a.h"
+#include "Chassis_d.h"
 #include "UART.h"
 #include "LOG_s.h"
 
@@ -16,8 +16,6 @@ void Chassis_Init(void)
     // USART_Printf(USART3, "$deadzone:#")     // PWM死区
     USART_Printf(USART3, "$mline:30#");      // 减速比
     USART_Printf(USART3, "$wdiameter:50#");  // 轮子直径
-
-    _INFO("Chassis initialized");
 }
 /**
  * @brief 设置底盘速度
