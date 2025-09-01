@@ -1,8 +1,20 @@
 #include "Chassis_d.h"
 #include "UART.h"
 #include "LOG_s.h"
+#include "Delay_s.h"
+
+#define CHASSIS_WHEEL_TRACK     170.0f      // 轮距
+#define CHASSIS_MAX_SPEED       1000        // 最大速度
+#define PI                      3.14159f
 
 ChassisParam_t chassisParam;
+
+/* ========================= 私 有 函 数 声 明 ========================= */
+
+static void Chassis_DifferentialIK(const ChassisParam_t* const param);
+static void Chassis_DifferentialFK(const ChassisParam_t* const param);
+
+/* ========================= 接 口 函 数 实 现 ========================= */
 
 /**
  * @brief 底盘初始化
@@ -12,10 +24,10 @@ void Chassis_Init(void)
     // 初始化串口
     iUSART_Init(iUSART3, USART_MODE_BASIC);
     // 配置底盘
-    USART_Printf(USART3, "$mtype:1#");      // 520电机
-    // USART_Printf(USART3, "$deadzone:#")     // PWM死区
-    USART_Printf(USART3, "$mline:30#");      // 减速比
-    USART_Printf(USART3, "$wdiameter:50#");  // 轮子直径
+    USART_Printf(USART3, "$mtype:1#");          // 520电机
+    // USART_Printf(USART3, "$deadzone:#");        // PWM死区
+    USART_Printf(USART3, "$mline:30#");         // 减速比
+    USART_Printf(USART3, "$wdiameter:50#");     // 轮子直径
 }
 /**
  * @brief 设置底盘速度
@@ -125,4 +137,98 @@ void Chassis_GetData(ChassisParam_t* const param)
                                                         param->speed[CHASSIS_WHEEL_RF], 
                                                         param->speed[CHASSIS_WHEEL_LR], 
                                                         param->speed[CHASSIS_WHEEL_RR]);
+}
+/**
+ * @brief 移动底盘
+ * @param linearVel 线速度
+ * @param angularVel 角速度(度/秒)
+ */
+void Chassis_Move(int linearVel, int angularVel)
+{
+    // 角度转弧度
+    float angularVelRad = angularVel * PI / 180.0f;
+    // 逆运动学解算
+    chassisParam.linearVel = linearVel;
+    chassisParam.angularVel = angularVelRad;
+    Chassis_DifferentialFK(&chassisParam);
+    // 设置速度
+    Chassis_SetSpeed(&chassisParam);
+}
+/**
+ * @brief 停止底盘
+ */
+void Chassis_Stop(void)
+{
+    Chassis_Move(0, 0);
+}
+/**
+ * @brief 直线移动
+ * @param speed 速度(前进>0, 后退<0)
+ */
+void Chassis_GoStraight(int speed)
+{
+    Chassis_Move(speed, 0);
+}
+/**
+ * @brief 转向运动
+ * @param angle 角度(单位度, 顺时针>0, 逆时针<0)
+ * @param angularVel 角速度(度/秒)
+ */
+void Chassis_Turn(int angle, int angularVel)
+{
+    uint32_t duration = (angle * 1000 < 0) ? (-angle * 1000 / angularVel) : (angle * 1000 / angularVel);
+    Chassis_Move(0, angularVel);
+    Delay_ms(duration);
+}
+
+/* ========================= 私 有 函 数 实 现 ========================= */
+
+/**
+ * @brief 差速驱动逆运动学解算
+ * @param param 底盘参数结构体指针
+ * @param param.linearVel   期望线速度
+ * @param param.angularVel  期望角速度
+ */
+static void Chassis_DifferentialIK(ChassisParam_t* const param)
+{
+    if(!param){
+        _WARN("Chassis_DifferentialIK: param is NULL");
+        return;
+    }
+
+    // 逆运动学解算
+    float leftVel = param->linearVel - (param->angularVel * CHASSIS_WHEEL_TRACK / 2.0f);
+    float rightVel = param->linearVel + (param->angularVel * CHASSIS_WHEEL_TRACK / 2.0f);
+    // 速度限幅
+    leftVel = leftVel > CHASSIS_MAX_SPEED ? CHASSIS_MAX_SPEED : (leftVel < -CHASSIS_MAX_SPEED ? -CHASSIS_MAX_SPEED : leftVel);
+    rightVel = rightVel > CHASSIS_MAX_SPEED ? CHASSIS_MAX_SPEED : (rightVel < -CHASSIS_MAX_SPEED ? -CHASSIS_MAX_SPEED : rightVel);
+    // 写入数据
+    param->speed[CHASSIS_WHEEL_LF] = leftVel;
+    param->speed[CHASSIS_WHEEL_RF] = rightVel;
+    param->speed[CHASSIS_WHEEL_LR] = leftVel;
+    param->speed[CHASSIS_WHEEL_RR] = rightVel;
+    // 打印
+    _INFO("Chassis_DifferentialIK: LF=%.2f, RF=%.2f, LR=%.2f, RR=%.2f", 
+          param->speed[CHASSIS_WHEEL_LF], 
+          param->speed[CHASSIS_WHEEL_RF], 
+          param->speed[CHASSIS_WHEEL_LR], 
+          param->speed[CHASSIS_WHEEL_RR]);
+}
+/**
+ * @brief 差速驱动正运动学解算
+ * @param param 底盘参数结构体指针
+ * @param param.speed[]   各轮速度
+ */
+static void Chassis_DifferentialFK(ChassisParam_t* const param)
+{
+    if(!param){
+        _WARN("Chassis_DifferentialFK: param is NULL");
+        return;
+    }
+
+    // 正运动学解算
+    param->linearVel = (param->speed[CHASSIS_WHEEL_RF] + param->speed[CHASSIS_WHEEL_LF]) / 2.0f;
+    param->angularVel = (param->speed[CHASSIS_WHEEL_RF] - param->speed[CHASSIS_WHEEL_LF]) / CHASSIS_WHEEL_TRACK;
+    // 打印
+    _INFO("Chassis_DifferentialFK: linearVel=%.2f, angularVel=%.2f", param->linearVel, param->angularVel);
 }

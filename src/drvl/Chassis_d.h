@@ -15,6 +15,8 @@ typedef struct{
     uint16_t pwm[CHASSIS_WHEEL_MAX];
     int encorderAll[CHASSIS_WHEEL_MAX];
     int encorder10ms[CHASSIS_WHEEL_MAX];
+    int linearVel;
+    float angularVel;           // rad/s
     float p;
     float i;
     float d;
@@ -22,10 +24,18 @@ typedef struct{
 
 extern ChassisParam_t chassisParam;
 
+/* ========================= 底 盘 接 口 函 数 声 明 ========================= */
+
 void Chassis_Init(void);
 void Chassis_SetSpeed(const ChassisParam_t* const param);
 void Chassis_SetPWM(const ChassisParam_t* const param);
 void Chassis_SetPID(const ChassisParam_t* const param);
 void Chassis_GetData(ChassisParam_t* const param);
+
+void Chassis_Move(int linearVel, int angularVel);
+void Chassis_Stop(void);
+void Chassis_GoStraight(int speed);
+void Chassis_Turn(int angle, int angularVel);
+
 
 #endif

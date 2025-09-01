@@ -1,11 +1,16 @@
 #include "SysManager_a.h"
 
-// 私有变量
+/* ========================= 私 有 变 量 ========================= */
+
 static SysState_t sysState = SYS_STATE_INIT;
 static SysCheck_t sysCheck = SYS_CHECK_USART;
+static SysMode_t sysMode = SYS_MODE_NORMAL;
 static bool sysCheckResults[SYS_CHECK_MAX] = {false};
-// 私有函数声明
+
+/* ========================= 私 有 函 数 声 明 ========================= */
+
 static void SysInit(void);
+
 static bool SysCheck_USART(void);
 static bool SysCheck_TIM(void);
 static bool SysCheck_EXTI(void);
@@ -13,6 +18,9 @@ static bool SysCheck_I2C(void);
 static bool SysCheck_SYSTICK(void);
 static bool SysCheck_DWT(void);
 static bool SysCheck_CHASSIS(void);
+
+static void SysModeRunning_Process(void);
+
 
 /**
  * @brief 系统管理器初始化函数
@@ -44,7 +52,7 @@ void SysManager_Process(void)
             sysState = SYS_STATE_RUNNING;
             break;
         case SYS_STATE_RUNNING:
-            
+            SysModeRunning_Process();
             break;
         case SYS_STATE_ERROR:
             _ERROR("System Error!");
@@ -91,6 +99,28 @@ static void SysInit(void)
     // 自检通过
     sysState = SYS_STATE_READY;
     _INFO("All System Checks Passed");
+}
+/**
+ * @brief 系统模式切换函数
+ */
+void SysModeRunning_Process(void)
+{
+    switch(sysMode){
+        case SYS_MODE_NORMAL:
+
+            break;
+        case SYS_MODE_EXPLOSIVE:
+
+            break;
+        case SYS_MODE_CSGO:
+
+            break;
+        case SYS_MODE_RESCUE:
+
+            break;
+        default:
+            break;
+    }
 }
 
 static bool SysCheck_USART(void)

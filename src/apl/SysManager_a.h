@@ -26,6 +26,13 @@ typedef enum{
     SYS_STATE_RUNNING,
     SYS_STATE_ERROR
 } SysState_t;
+// 系统模式定义
+typedef enum{
+    SYS_MODE_NORMAL,
+    SYS_MODE_EXPLOSIVE,
+    SYS_MODE_CSGO,
+    SYS_MODE_RESCUE
+} SysMode_t;
 // 自检项定义
 typedef enum{
     // Hal
