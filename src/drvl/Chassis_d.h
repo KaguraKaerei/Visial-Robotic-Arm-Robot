@@ -3,6 +3,8 @@
 
 #include "stm32f10x.h"
 
+/* ========================= 底 盘 类 定 义 ========================= */
+
 typedef enum{
     CHASSIS_WHEEL_LF,
     CHASSIS_WHEEL_RF,

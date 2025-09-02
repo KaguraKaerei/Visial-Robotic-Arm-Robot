@@ -11,8 +11,8 @@ ChassisParam_t chassisParam;
 
 /* ========================= 私 有 函 数 声 明 ========================= */
 
-static void Chassis_DifferentialIK(const ChassisParam_t* const param);
-static void Chassis_DifferentialFK(const ChassisParam_t* const param);
+static void Chassis_DifferentialIK(ChassisParam_t* const param);
+static void Chassis_DifferentialFK(ChassisParam_t* const param);
 
 /* ========================= 接 口 函 数 实 现 ========================= */
 
@@ -150,7 +150,7 @@ void Chassis_Move(int linearVel, int angularVel)
     // 逆运动学解算
     chassisParam.linearVel = linearVel;
     chassisParam.angularVel = angularVelRad;
-    Chassis_DifferentialFK(&chassisParam);
+    Chassis_DifferentialIK(&chassisParam);
     // 设置速度
     Chassis_SetSpeed(&chassisParam);
 }
@@ -176,6 +176,10 @@ void Chassis_GoStraight(int speed)
  */
 void Chassis_Turn(int angle, int angularVel)
 {
+    if(angularVel == 0){
+        _WARN("Chassis_Turn: angularVel is zero! Please use Chassis_GoStraight.");
+        return;
+    }
     uint32_t duration = (angle * 1000 < 0) ? (-angle * 1000 / angularVel) : (angle * 1000 / angularVel);
     Chassis_Move(0, angularVel);
     Delay_ms(duration);
@@ -203,12 +207,12 @@ static void Chassis_DifferentialIK(ChassisParam_t* const param)
     leftVel = leftVel > CHASSIS_MAX_SPEED ? CHASSIS_MAX_SPEED : (leftVel < -CHASSIS_MAX_SPEED ? -CHASSIS_MAX_SPEED : leftVel);
     rightVel = rightVel > CHASSIS_MAX_SPEED ? CHASSIS_MAX_SPEED : (rightVel < -CHASSIS_MAX_SPEED ? -CHASSIS_MAX_SPEED : rightVel);
     // 写入数据
-    param->speed[CHASSIS_WHEEL_LF] = leftVel;
-    param->speed[CHASSIS_WHEEL_RF] = rightVel;
-    param->speed[CHASSIS_WHEEL_LR] = leftVel;
-    param->speed[CHASSIS_WHEEL_RR] = rightVel;
+    param->speed[CHASSIS_WHEEL_LF] = (int)leftVel;
+    param->speed[CHASSIS_WHEEL_RF] = (int)rightVel;
+    param->speed[CHASSIS_WHEEL_LR] = (int)leftVel;
+    param->speed[CHASSIS_WHEEL_RR] = (int)rightVel;
     // 打印
-    _INFO("Chassis_DifferentialIK: LF=%.2f, RF=%.2f, LR=%.2f, RR=%.2f", 
+    _INFO("Chassis_DifferentialIK: LF=%d, RF=%d, LR=%d, RR=%d", 
           param->speed[CHASSIS_WHEEL_LF], 
           param->speed[CHASSIS_WHEEL_RF], 
           param->speed[CHASSIS_WHEEL_LR], 
@@ -230,5 +234,5 @@ static void Chassis_DifferentialFK(ChassisParam_t* const param)
     param->linearVel = (param->speed[CHASSIS_WHEEL_RF] + param->speed[CHASSIS_WHEEL_LF]) / 2.0f;
     param->angularVel = (param->speed[CHASSIS_WHEEL_RF] - param->speed[CHASSIS_WHEEL_LF]) / CHASSIS_WHEEL_TRACK;
     // 打印
-    _INFO("Chassis_DifferentialFK: linearVel=%.2f, angularVel=%.2f", param->linearVel, param->angularVel);
+    _INFO("Chassis_DifferentialFK: linearVel=%d, angularVel=%d", (int)param->linearVel, (int)param->angularVel);
 }
