@@ -1,5 +1,5 @@
-#ifndef __JY61p_H
-#define __JY61p_H
+#ifndef __JY61p_D_H
+#define __JY61p_D_H
 
 #include "stm32f10x.h"
 #include "JY61p_I2C.h"
@@ -16,12 +16,12 @@ typedef struct {
     float angle_x; // X轴欧拉角 (°)
     float angle_y; // Y轴欧拉角 (°)
     float angle_z; // Z轴欧拉角 (°)
-} JY61P_Data;
+} JY61P_Data_t;
 
 // 函数声明
 uint8_t JY61p_Init(void);
 uint8_t JY61p_ReadReg(uint8_t RegAddress);
 uint8_t JY61p_Check(void);
-void JY61p_GetData(JY61P_Data *data);
+void JY61p_GetData(JY61P_Data_t *data);
 
 #endif

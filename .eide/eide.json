@@ -7,17 +7,7 @@
   ],
   "virtualFolder": {
     "name": "<virtual_root>",
-    "files": [
-      {
-        "path": "src/drvl/JY61p.c"
-      },
-      {
-        "path": "src/drvl/JY61p.h"
-      },
-      {
-        "path": "src/drvl/JY61p_Reg.h"
-      }
-    ],
+    "files": [],
     "folders": [
       {
         "name": "Library",

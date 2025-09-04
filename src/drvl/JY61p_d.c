@@ -1,4 +1,4 @@
-#include "JY61p.h"
+#include "JY61p_d.h"
 
 /* JY61p指定寄存器写1个字节 */
 void JY61p_WriteReg(uint8_t RegAddress, uint8_t Data)
@@ -83,7 +83,7 @@ uint8_t JY61p_Init(void)
 }
 
 /* 传入结构体指针，获取JY61p的各项数据 */
-void JY61p_GetData(JY61P_Data *data)
+void JY61p_GetData(JY61P_Data_t *data)
 {
     uint8_t data_acc[6];
     uint8_t data_gyro[6];

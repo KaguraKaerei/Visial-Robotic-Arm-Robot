@@ -11,6 +11,8 @@
 
 ChassisParam_t chassisParam;
 PID_Param_t selfCtrlPID[CHASSIS_WHEEL_MAX];
+JY61P_Data_t jy61pData;
+PID_Param_t jy61pYawPID;
 
 /* ========================= 私 有 函 数 声 明 ========================= */
 
@@ -198,11 +200,16 @@ void Chassis_SelfCtrl_Init(void)
     for(uint8_t i = CHASSIS_WHEEL_LF; i < CHASSIS_WHEEL_MAX; ++i){
         PID_Init(&selfCtrlPID[i]);
         PID_SetPID(&selfCtrlPID[i], 0.1f, 0.001f, 0.05f);
-        PID_SetLimit(&selfCtrlPID[i], 100.0f, 1000.0f);
+        PID_SetLimit(&selfCtrlPID[i], 50.0f, 200.0f);
     }
+    PID_Init(&jy61pYawPID);
+    PID_SetPID(&jy61pYawPID, 2.0f, 0.01f, 0.5f);
+    PID_SetLimit(&jy61pYawPID, 80.0f, 300.0f);
 }
 /**
- * @brief 
+ * @brief 非驱动板闭环控制移动
+ * @param linearVel 线速度
+ * @param angularVel 角速度(度/秒)
  */
 void Chassis_SelfCtrl_Move(int linearVel, int angularVel)
 {
@@ -214,6 +221,75 @@ void Chassis_SelfCtrl_Move(int linearVel, int angularVel)
     Chassis_DifferentialIK(&chassisParam);
     // 自解算闭环控制速度
     Chassis_SelfCtrl(&chassisParam);
+}
+/**
+ * @brief 非驱动板闭环控制直线移动
+ * @param speed 速度(前进>0, 后退<0)
+ */
+void Chassis_SelfCtrl_GoStraight(int speed)
+{
+    Chassis_SelfCtrl_Move(speed, 0);
+}
+/**
+ * @brief 非驱动板闭环控制转向运动
+ * @param angle 角度(单位度, 顺时针>0, 逆时针<0)
+ * @param angularVel 角速度(度/秒)
+ */
+void Chassis_SelfCtrl_Turn(int angle, int angularVel)
+{
+    if(angularVel == 0){
+        _WARN("Chassis_SelfCtrl_Turn: angularVel is zero! Please use Chassis_SelfCtrl_GoStraight.");
+        return;
+    }
+    uint32_t duration = (angle * 1000 < 0) ? (-angle * 1000 / angularVel) : (angle * 1000 / angularVel);
+    Chassis_SelfCtrl_Move(0, angularVel);
+    Delay_ms(duration);
+}
+/**
+ * @brief 非驱动板闭环控制转向运动(JY61P陀螺仪角度闭环)
+ * @param relativeFlag 目标角度相对标志(1:相对当前角度, 0:绝对角度)
+ * @param targetAngle 目标角度(单位度, 0~360)
+ * @param tolerance 允许误差(单位度)
+ * @param jyData JY61P数据结构体指针
+ * @param timeout 超时时间(单位10ms)
+ */
+void Chassis_SelfCtrl_Turn_JY61(uint8_t relativeFlag, int targetAngle, uint8_t tolerance, JY61P_Data_t* const jyData, int timeout)
+{
+    if(!jyData){
+        _WARN("Chassis_SelfCtrl_Turn_JY61: jyData is NULL!");
+        return;
+    }
+    if(!tolerance) tolerance = 1;
+
+    // 初始角度
+    JY61p_GetData(jyData);
+    float initAngle = jyData->angle_z;
+    float currentAngle = initAngle;
+    if(relativeFlag){
+        targetAngle += initAngle;
+        while(targetAngle >= 360.0f) targetAngle -= 360.0f;
+        while(targetAngle < 0.0f) targetAngle += 360.0f;
+    }
+    // 向目标角度转动
+    do{
+        JY61p_GetData(jyData);
+        currentAngle = jyData->angle_z;
+        float err = targetAngle - currentAngle;
+        while(err > 180.0f) err -= 360.0f;
+        while(err < -180.0f) err += 360.0f;
+
+        PID_Controller(&jy61pYawPID, 0, err, 0.01f);
+        int targetAngularVel = (int)jy61pYawPID.output;
+        Chassis_SelfCtrl_Move(0, targetAngularVel);
+        Delay_ms(10);
+    }
+    while(--timeout && ((int)(targetAngle - currentAngle) > tolerance || (int)(targetAngle - currentAngle) < -tolerance));
+
+
+    Chassis_Stop();
+    if(timeout == 0){
+        _WARN("Chassis_SelfCtrl_Turn_JY61: timeout!");
+    }
 }
 
 /* ========================= 私 有 函 数 实 现 ========================= */
