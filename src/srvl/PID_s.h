@@ -6,16 +6,12 @@
 /* ========================= P I D 类 定 义 ========================= */
 
 typedef struct{
-    float p;
-    float i;
-    float d;
+    float p, i, d;
     float output;
     float integral;
-    float lastActual;
-    float lastDiff;
+    float lastActual, lastDiff;
     float alpha;
-    float intLimit;
-    float outputLimit;
+    float intLimit, outputLimit;
     float intThreshold;
     float deadZone;
 } PID_Param_t;

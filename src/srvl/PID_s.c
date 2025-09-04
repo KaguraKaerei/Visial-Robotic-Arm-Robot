@@ -18,6 +18,15 @@ void PID_Init(PID_Param_t* const PID)
     PID->integral = 0.0f;
     PID->lastActual = 0.0f;
     PID->lastDiff = 0.0f;
+
+    PID->p = 0.0f;
+    PID->i = 0.0f;
+    PID->d = 0.0f;
+    PID->alpha = 1.0f;
+    PID->deadZone = 0.0f;
+    PID->intLimit = 0.0f;
+    PID->outputLimit = 0.0f;
+    PID->intThreshold = 0.0f;
 }
 /**
  * @brief PID核心参数配置函数

@@ -15,13 +15,12 @@ typedef enum{
 typedef struct{
     int speed[CHASSIS_WHEEL_MAX];
     uint16_t pwm[CHASSIS_WHEEL_MAX];
+    int encorderSpeed[CHASSIS_WHEEL_MAX];
     int encorderAll[CHASSIS_WHEEL_MAX];
     int encorder10ms[CHASSIS_WHEEL_MAX];
     int linearVel;
     float angularVel;           // rad/s
-    float p;
-    float i;
-    float d;
+    float p, i, d;
 } ChassisParam_t;
 
 extern ChassisParam_t chassisParam;
@@ -39,5 +38,7 @@ void Chassis_Stop(void);
 void Chassis_GoStraight(int speed);
 void Chassis_Turn(int angle, int angularVel);
 
+void Chassis_SelfCtrl_Init(void);
+void Chassis_SelfCtrl_Move(int linearVel, int angularVel);
 
 #endif
