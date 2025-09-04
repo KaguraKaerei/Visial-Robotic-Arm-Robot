@@ -46,16 +46,12 @@ void JY61p_ReadReg_Mul(uint8_t RegAddress, uint8_t *data, uint8_t len)
     JY61p_I2C_Start();
     JY61p_I2C_SendByte(JY61P_ADDRESS << 1 | 0x01); // 从机地址读
     JY61p_I2C_ReceiveAck();
-    for (i = 0; i < len; i++)
-    {
+    for (i = 0; i < len; i++) {
         data[i] = JY61p_I2C_ReceiveByte();
-        if (i < len - 1)
-        {
+        if (i < len - 1) {
             JY61p_I2C_SendAck(ACK);
-        }
-        else
-        {
-            JY61p_I2C_SendAck(NACK);    //发送非应答，从机停止发送数据
+        } else {
+            JY61p_I2C_SendAck(NACK); // 发送非应答，从机停止发送数据
         }
     }
     JY61p_I2C_Stop();
@@ -69,7 +65,7 @@ uint8_t JY61p_Check(void)
     JY61p_I2C_SendByte((JY61P_ADDRESS) << 1 | 0); // 1010 000 0 设备地址写
     ack = JY61p_I2C_ReceiveAck();
     JY61p_I2C_Stop();
-    ack = JY61p_ReadReg(JY61P_ADDRESS);
+
     return ack;
 }
 
@@ -93,18 +89,18 @@ void JY61p_GetData(JY61P_Data_t *data)
     JY61p_ReadReg_Mul(JY61P_GYRO_X_L, data_gyro, 6);
     JY61p_ReadReg_Mul(JY61P_ANGLE_X_L, data_angle, 6);
 
-	// 解算加速度
-	data->acc_x = ((int16_t)((data_acc[1] << 8) | data_acc[0])) / 32768.0f * 16.0f;
-	data->acc_y = ((int16_t)((data_acc[3] << 8) | data_acc[2])) / 32768.0f * 16.0f;
-	data->acc_z = ((int16_t)((data_acc[5] << 8) | data_acc[4])) / 32768.0f * 16.0f;
+    // 解算加速度
+    data->acc_x = ((int16_t)((data_acc[1] << 8) | data_acc[0])) / 32768.0f * 16.0f;
+    data->acc_y = ((int16_t)((data_acc[3] << 8) | data_acc[2])) / 32768.0f * 16.0f;
+    data->acc_z = ((int16_t)((data_acc[5] << 8) | data_acc[4])) / 32768.0f * 16.0f;
 
-	// 解算角速度
-	data->gyro_x = ((int16_t)((data_gyro[1] << 8) | data_gyro[0])) / 32768.0f * 2000.0f;
-	data->gyro_y = ((int16_t)((data_gyro[3] << 8) | data_gyro[2])) / 32768.0f * 2000.0f;
-	data->gyro_z = ((int16_t)((data_gyro[5] << 8) | data_gyro[4])) / 32768.0f * 2000.0f;
+    // 解算角速度
+    data->gyro_x = ((int16_t)((data_gyro[1] << 8) | data_gyro[0])) / 32768.0f * 2000.0f;
+    data->gyro_y = ((int16_t)((data_gyro[3] << 8) | data_gyro[2])) / 32768.0f * 2000.0f;
+    data->gyro_z = ((int16_t)((data_gyro[5] << 8) | data_gyro[4])) / 32768.0f * 2000.0f;
 
-	// 解算欧拉角
-	data->angle_x = ((int16_t)((data_angle[1] << 8) | data_angle[0])) / 32768.0f * 180.0f;
-	data->angle_y = ((int16_t)((data_angle[3] << 8) | data_angle[2])) / 32768.0f * 180.0f;
-	data->angle_z = ((int16_t)((data_angle[5] << 8) | data_angle[4])) / 32768.0f * 180.0f;
+    // 解算欧拉角
+    data->angle_x = ((int16_t)((data_angle[1] << 8) | data_angle[0])) / 32768.0f * 180.0f;
+    data->angle_y = ((int16_t)((data_angle[3] << 8) | data_angle[2])) / 32768.0f * 180.0f;
+    data->angle_z = ((int16_t)((data_angle[5] << 8) | data_angle[4])) / 32768.0f * 180.0f;
 }
