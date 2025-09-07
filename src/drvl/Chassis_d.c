@@ -31,11 +31,17 @@ void Chassis_Init(void)
     // 初始化串口
     iUSART_Init(iUSART3, USART_MODE_BASIC);
     // 配置底盘
+    // USART_Printf(USART3, "$flash_reset#");      // 重置参数
     USART_Printf(USART3, "$mtype:1#");          // 520电机
     // USART_Printf(USART3, "$deadzone:#");        // PWM死区
-    USART_Printf(USART3, "$mline:500#");        // 分辨率
-    USART_Printf(USART3, "$mphase:30#");        // 减速比
+    USART_Printf(USART3, "$mline:11#");         // 分辨率
+    USART_Printf(USART3, "$mphase:56#");        // 减速比
     USART_Printf(USART3, "$wdiameter:85#");     // 轮子直径
+    
+    // chassisParam.p = 0.01f;
+    // chassisParam.i = 0.0f;
+    // chassisParam.d = 0.0f;
+    // Chassis_SetPID(&chassisParam);
 }
 /**
  * @brief 设置底盘速度
@@ -94,6 +100,10 @@ void Chassis_SetPID(const ChassisParam_t* const param)
  */
 void Chassis_GetData(ChassisParam_t* const param)
 {
+    if(!param){
+        _WARN("Chassis_GetData: param is NULL");
+        return;
+    }
     // 清空接收缓冲区
     while(USART_GetFlagStatus(USART3, USART_FLAG_RXNE) == SET){
         USART_ReceiveData(USART3);
@@ -103,17 +113,23 @@ void Chassis_GetData(ChassisParam_t* const param)
     char res[3][32] = {0};
     uint8_t index = 0;
     uint8_t line = 0;
-    uint32_t timeout = 10000;
-    while(--timeout){
+    uint32_t timeout = 1000;
+    while(timeout > 0){
         if(USART_GetFlagStatus(USART3, USART_FLAG_RXNE) == SET){
             char ch = USART_ReceiveData(USART3);
-            res[line][index++] = ch;
+            if(index < sizeof(res[0]) - 1){
+                res[line][index++] = ch;
+            }
             if(ch == '#' || index >= sizeof(res[0]) - 1){
                 res[line][index] = '\0';
                 ++line;
                 index = 0;
             }
             if(line >= 3) break;
+        }
+        else{
+            Delay_us(100);
+            --timeout;
         }
     }
     if(timeout == 0){

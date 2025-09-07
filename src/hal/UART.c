@@ -13,7 +13,7 @@ typedef struct{
 const USART_Config_t USART_Config[] = {
     {iUSART1, USART_MODE_BASIC, RCC_APB2Periph_USART1, USART1, USART1_IRQn, 115200},
     {iUSART2, USART_MODE_BASIC, RCC_APB1Periph_USART2, USART2, USART2_IRQn, 115200},
-    {iUSART3, USART_MODE_BASIC, RCC_APB1Periph_USART3, USART3, USART3_IRQn, 115200}
+    {iUSART3, USART_MODE_BASIC, RCC_APB1Periph_USART3, USART3, NULL, 115200}
 };
 /* 私有函数声明 */
 static void USART_SendString(USART_TypeDef* USARTx, const char* str);
@@ -111,14 +111,16 @@ void iUSART_Init(iUSART_t USART, USART_Mode_t mode)
         USART_HalfDuplexCmd(config->USARTx, ENABLE);
     }
     // NVIC初始化配置
-    USART_ClearFlag(config->USARTx, USART_FLAG_RXNE);
-    USART_ITConfig(config->USARTx, USART_IT_RXNE, ENABLE);
-    NVIC_InitTypeDef NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel = config->IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
+    if(config->IRQn != NULL){
+        USART_ClearFlag(config->USARTx, USART_FLAG_RXNE);
+        USART_ITConfig(config->USARTx, USART_IT_RXNE, ENABLE);
+        NVIC_InitTypeDef NVIC_InitStructure;
+        NVIC_InitStructure.NVIC_IRQChannel = config->IRQn;
+        NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+        NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+        NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+        NVIC_Init(&NVIC_InitStructure);
+    }
     // 启动串口
     USART_Cmd(config->USARTx, ENABLE);
 }

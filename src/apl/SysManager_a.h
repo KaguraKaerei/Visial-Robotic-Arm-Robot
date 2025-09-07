@@ -12,17 +12,19 @@
 #include "DWT.h"
 // Driver Layer
 #include "LED_d.h"
+#include "JY61p_d.h"
+#include "Chassis_d.h"
 // Service Layer
 #include "LOG_s.h"
 #include "Delay_s.h"
 #include "Chassis_d.h"
+#include "BlueTooth.h"
 // Application Layer
 
 
 // 系统状态定义
 typedef enum{
     SYS_STATE_INIT,
-    SYS_STATE_READY,
     SYS_STATE_RUNNING,
     SYS_STATE_ERROR
 } SysState_t;
@@ -33,22 +35,6 @@ typedef enum{
     SYS_MODE_CSGO,
     SYS_MODE_RESCUE
 } SysMode_t;
-// 自检项定义
-typedef enum{
-    // Hal
-    SYS_CHECK_USART,
-    SYS_CHECK_TIMER,
-    SYS_CHECK_EXTI,
-    SYS_CHECK_I2C,
-    SYS_CHECK_SYSTICK,
-    SYS_CHECK_DWT,
-    // Drvl
-    SYS_CHECK_CHASSIS,
-    // Srvl
-
-    // Apl
-    SYS_CHECK_MAX
-} SysCheck_t;
 
 // 接口函数声明
 void SysManager_Init(void);

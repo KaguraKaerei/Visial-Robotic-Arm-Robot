@@ -2,13 +2,13 @@
 
 void JY61p_I2C_W_SCL(uint8_t BitValue)
 {
-    GPIO_WriteBit(GPIOA, GPIO_Pin_4, (BitAction)BitValue);
+    GPIO_WriteBit(GPIOB, GPIO_Pin_8, (BitAction)BitValue);
     Delay_us(10);
 }
 
 void JY61p_I2C_W_SDA(uint8_t BitValue)
 {
-    GPIO_WriteBit(GPIOA, GPIO_Pin_5, (BitAction)BitValue);
+    GPIO_WriteBit(GPIOB, GPIO_Pin_9, (BitAction)BitValue);
     Delay_us(10);
 }
 
@@ -16,22 +16,22 @@ uint8_t JY61p_I2C_R_SDA(void)
 {
     uint8_t BitValue;
     //    Delay_ms(100);
-    BitValue = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_5);
+    BitValue = GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_9);
     Delay_us(10);
     return BitValue;
 }
 
 void JY61p_I2C_Init(void)
 {
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 
     GPIO_InitTypeDef GPIO_InitStructure;
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_OD;
-    GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_4 | GPIO_Pin_5;
+    GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_8 | GPIO_Pin_9;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-    GPIO_SetBits(GPIOA, GPIO_Pin_4 | GPIO_Pin_5);
+    GPIO_SetBits(GPIOB, GPIO_Pin_8 | GPIO_Pin_9);
 }
 
 void JY61p_I2C_Start(void)

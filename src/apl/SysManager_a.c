@@ -1,26 +1,16 @@
 #include "SysManager_a.h"
 
-/* ========================= 私 有 变 量 ========================= */
+/* ========================= 私 有 变 量 声 明 ========================= */
 
 static SysState_t sysState = SYS_STATE_INIT;
-static SysCheck_t sysCheck = SYS_CHECK_USART;
-static SysMode_t sysMode = SYS_MODE_NORMAL;
-static bool sysCheckResults[SYS_CHECK_MAX] = {false};
+static bool sysReady = false;
 
 /* ========================= 私 有 函 数 声 明 ========================= */
 
-static void SysInit(void);
+static void SysManager_InitHardware(void);
+static void SysManager_InitModules(void);
 
-static bool SysCheck_USART(void);
-static bool SysCheck_TIM(void);
-static bool SysCheck_EXTI(void);
-static bool SysCheck_I2C(void);
-static bool SysCheck_SYSTICK(void);
-static bool SysCheck_DWT(void);
-static bool SysCheck_CHASSIS(void);
-
-static void SysModeRunning_Process(void);
-
+/* ========================= 接 口 函 数 实 现 ========================= */
 
 /**
  * @brief 系统管理器初始化函数
@@ -28,197 +18,78 @@ static void SysModeRunning_Process(void);
 void SysManager_Init(void)
 {
     sysState = SYS_STATE_INIT;
-    sysCheck = SYS_CHECK_USART;
-    for(uint8_t i = 0; i < SYS_CHECK_MAX; ++i){
-        sysCheckResults[i] = false;
-    }
+    sysReady = false;
 
-    LED_Init();
-    LED_On();
+    // 基础硬件初始化
+    SysManager_InitHardware();
+    // 功能模块初始化
+    SysManager_InitModules();
+
+    sysState = SYS_STATE_RUNNING;
+    sysReady = true;
+    LED_Off();
 }
+
 /**
  * @brief 系统管理器进程函数
  */
 void SysManager_Process(void)
 {
+    if(!sysReady) return;
+
     switch(sysState)
     {
-        case SYS_STATE_INIT:
-            SysInit();
-            break;
-        case SYS_STATE_READY:
-            _INFO("System Ready!");
-            LED_Off();
-            sysState = SYS_STATE_RUNNING;
-            break;
         case SYS_STATE_RUNNING:
-            SysModeRunning_Process();
+            // 系统正常运行
+
             break;
+            
         case SYS_STATE_ERROR:
-            _ERROR("System Error!");
+            _ERROR("System in error state!");
+            LED_On();
             break;
+            
         default:
             break;
     }
 }
+
 /**
- * 
+ * @brief 检查系统是否就绪
  */
 bool System_Is_Ready(void)
 {
-    return sysState == SYS_STATE_RUNNING;
+    return sysReady && (sysState != SYS_STATE_ERROR);
 }
 
 /**
- * @brief 系统初始化函数
+ * @brief 基础硬件初始化
  */
-static void SysInit(void)
+static void SysManager_InitHardware(void)
 {
-    bool(* checkFunctions[SYS_CHECK_MAX])(void) = {
-        SysCheck_USART,
-        SysCheck_TIM,
-        SysCheck_EXTI,
-        SysCheck_I2C,
-        SysCheck_SYSTICK,
-        SysCheck_DWT,
-        SysCheck_CHASSIS
-    };
-    const char* checkNames[SYS_CHECK_MAX] = {
-        "USART", "TIM", "EXTI", "I2C", "SYSTICK", "DWT", "CHASSIS"
-    };
-    
-    for( ; sysCheck < SYS_CHECK_MAX; ++sysCheck){
-        sysCheckResults[sysCheck] = checkFunctions[sysCheck]();
-        if(!sysCheckResults[sysCheck]){
-            sysState = SYS_STATE_ERROR;
-            _ERROR("System Check Failed: %s", checkNames[sysCheck]);
-            return;
-        }
-    }
-    
-    // 自检通过
-    sysState = SYS_STATE_READY;
-    _INFO("All System Checks Passed");
-}
-/**
- * @brief 系统模式切换函数
- */
-void SysModeRunning_Process(void)
-{
-    switch(sysMode){
-        case SYS_MODE_NORMAL:
+    LED_Init();
+    LED_On();
 
-            break;
-        case SYS_MODE_EXPLOSIVE:
-
-            break;
-        case SYS_MODE_CSGO:
-
-            break;
-        case SYS_MODE_RESCUE:
-
-            break;
-        default:
-            break;
-    }
-}
-
-static bool SysCheck_USART(void)
-{
-    iUSART_Init(iUSART1, USART_MODE_BASIC);
-    // USART_RegisterCallback();
-
-    if(!(USART1->CR1 & USART_CR1_UE)){
-        return false;
-    }
-
-    return true;
-}
-
-static bool SysCheck_TIM(void)
-{
-    iTIM_Init(iTIM2, TIM_MODE_BASIC);
-    // TIM_RegisterCallback();
-
-    if(!(RCC->APB1ENR & RCC_APB1ENR_TIM2EN)){
-        _ERROR("TIM2 Clock Enable Failed");
-        return false;
-    }
-    else if(!(TIM2->CR1 & TIM_CR1_CEN)){
-        _ERROR("TIM2 Start Failed");
-        return false;
-    }
-
-    return true;
-}
-
-static bool SysCheck_EXTI(void)
-{
-    iEXTI_Init(GPIOA, GPIO_Pin_0, GPIO_Mode_IN_FLOATING, EXTI_Trigger_Rising);
-    // EXTI_RegisterCallback();
-
-    if(!(RCC->APB2ENR & RCC_APB2ENR_IOPAEN)){
-        _ERROR("GPIOA Clock Not Enabled");
-        return false;
-    }
-    else if(!(RCC->APB2ENR & RCC_APB2ENR_AFIOEN)){
-        _ERROR("AFIO Clock Not Enabled");
-        return false;
-    }
-    else if(!(EXTI->IMR & EXTI_Line0)){
-        _ERROR("EXTI0 Line Not Enabled");
-        return false;
-    }
-    else if(!(NVIC->ISER[EXTI0_IRQn >> 5] & (1 << (EXTI0_IRQn & 0x1F)))){
-        _ERROR("EXTI0 NVIC Not Enabled");
-        return false;
-    }
-
-    return true;
-}
-
-static bool SysCheck_I2C(void)
-{
-	GPIO_I2C_Init();
-
-    return true;
-}
-
-static bool SysCheck_SYSTICK(void)
-{
-	sysTick_Init();
-
-    if(!(SysTick->CTRL & SysTick_CTRL_ENABLE_Msk)){
-        _ERROR("SysTick Not Enabled");
-        return false;
-    }
-    else if(!(SysTick->CTRL & SysTick_CTRL_TICKINT_Msk)){
-        _ERROR("SysTick Interrupt Not Enabled");
-        return false;
-    }
-
-    return true;
-}
-
-static bool SysCheck_DWT(void)
-{
+    sysTick_Init();
     DWT_Init();
 
-    if(!(CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk)){
-        _ERROR("DWT Trace Not Enabled");
-        return false;
-    }
-    else if(!(DWT->CTRL & DWT_CTRL_CYCCNTENA_Msk)){
-        _ERROR("DWT CYCCNT Not Enabled");
-        return false;
-    }
-
-    return true;
+    // 串口通信
+    iUSART_Init(iUSART1, USART_MODE_BASIC);  // 蓝牙
+    iUSART_Init(iUSART3, USART_MODE_BASIC);  // 底盘
 }
 
-static bool SysCheck_CHASSIS(void)
+/**
+ * @brief 功能模块初始化
+ */
+static void SysManager_InitModules(void)
 {
+    // I2C（陀螺仪）
+    JY61p_I2C_Init();
+    // 底盘
     Chassis_Init();
-
-    return true;
+    Chassis_SelfCtrl_Init();
+    // 蓝牙
+    BlueTooth_Init();
+    // 陀螺仪
+    JY61p_Init();
 }
