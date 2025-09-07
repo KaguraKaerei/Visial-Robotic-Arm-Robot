@@ -5,7 +5,7 @@
 #include "PID_s.h"
 
 #define CHASSIS_WHEEL_PERIMETER     26.69       // 轮周长(cm)
-#define CHASSIS_WHEEL_TRACK         170.0f      // 轮距
+#define CHASSIS_WHEEL_TRACK         140.0f      // 轮距
 #define CHASSIS_MAX_SPEED           1000        // 最大速度
 #define PI                          3.14159f
 
@@ -204,9 +204,17 @@ void Chassis_Turn(int angle, int angularVel)
         _WARN("Chassis_Turn: angularVel is zero! Please use Chassis_GoStraight.");
         return;
     }
-    uint32_t duration = (angle * 1000 < 0) ? (-angle * 1000 / angularVel) : (angle * 1000 / angularVel);
+    // uint32_t duration = (angle * 1000 < 0) ? (-angle * 1000 / angularVel) : (angle * 1000 / angularVel);
     Chassis_Move(0, angularVel);
-    Delay_ms(duration);
+
+    int targetAngle = jy61pData.angle_z + angle;
+    do{
+        JY61p_GetData(&jy61pData);
+        // Delay_us(100);
+    }
+	while(targetAngle - jy61pData.angle_z > 1 || targetAngle - jy61pData.angle_z < -1);
+
+    Chassis_Stop();
 }
 /**
  * @brief 非驱动板闭环控制初始化
@@ -329,6 +337,7 @@ static void Chassis_DifferentialIK(ChassisParam_t* const param)
     // 速度限幅
     leftVel = leftVel > CHASSIS_MAX_SPEED ? CHASSIS_MAX_SPEED : (leftVel < -CHASSIS_MAX_SPEED ? -CHASSIS_MAX_SPEED : leftVel);
     rightVel = rightVel > CHASSIS_MAX_SPEED ? CHASSIS_MAX_SPEED : (rightVel < -CHASSIS_MAX_SPEED ? -CHASSIS_MAX_SPEED : rightVel);
+
     // 写入数据
     param->speed[CHASSIS_WHEEL_LF] = (int)leftVel;
     param->speed[CHASSIS_WHEEL_RF] = (int)rightVel;

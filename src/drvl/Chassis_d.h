@@ -3,6 +3,9 @@
 
 #include "stm32f10x.h"
 #include "JY61p_d.h"
+#include "PID_s.h"
+
+extern uint8_t stopFlag;
 
 /* ========================= 底 盘 类 定 义 ========================= */
 
@@ -25,6 +28,7 @@ typedef struct{
 } ChassisParam_t;
 
 extern ChassisParam_t chassisParam;
+extern PID_Param_t jy61pYawPID;
 
 /* ========================= 底 盘 接 口 函 数 声 明 ========================= */
 

@@ -3,10 +3,11 @@
 #include "Delay_s.h"
 #include "UART.h"
 #include "LED_d.h"
+#include "Chassis_d.h"
 #include <stdio.h>
 #include <string.h>
 
-/* ========================= 私 有 变量 声 明 ========================= */
+/* ========================= 私 有 变 量 声 明 ========================= */
 static RingBuffer_t btRingBuffer;
 static uint8_t btBuffer[256];
 static char cmdBuffer[64];
@@ -77,6 +78,7 @@ static void BlueTooth_Callback(void)
 
 static void BlueTooth_Parse(const char* cmd)
 {
+    float p, i, d;
     if(!cmd){
         _WARN("BlueTooth_Parse: cmd is NULL");
         return;
@@ -88,6 +90,11 @@ static void BlueTooth_Parse(const char* cmd)
     else if(strcmp(cmd, "$CMD:LED_OFF#") == 0){
         LED_Off();
         _INFO("BlueTooth_Parse: LED turned OFF");
+    }
+	else if(sscanf(cmd, "$PID:%f,%f,%f", &p, &i, &d) == 3){
+        jy61pYawPID.p = p;
+        jy61pYawPID.i = i;
+        jy61pYawPID.d = d;
     }
     else{
         _WARN("BlueTooth_Parse: Unknown command '%s'", cmd);

@@ -1,1 +1,8 @@
-{}
+{
+	"files.associations": {
+		"*.rmd": "markdown",
+		"delay_s.h": "c",
+		"dwt.h": "c",
+		"systick.h": "c"
+	}
+}
