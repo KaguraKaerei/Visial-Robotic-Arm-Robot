@@ -79,17 +79,31 @@ static void BlueTooth_Callback(void)
 static void BlueTooth_Parse(const char* cmd)
 {
     float p, i, d;
+    int speed, angle, angularVel;
     if(!cmd){
         _WARN("BlueTooth_Parse: cmd is NULL");
         return;
     }
-    if(strcmp(cmd, "$CMD:LED_ON#") == 0){
-        LED_On();
-        _INFO("BlueTooth_Parse: LED turned ON");
+    if(sscanf(cmd, "$MODE:GO:%d#", &speed) == 1){
+        Chassis_GoStraight(speed);
     }
-    else if(strcmp(cmd, "$CMD:LED_OFF#") == 0){
-        LED_Off();
-        _INFO("BlueTooth_Parse: LED turned OFF");
+    else if(sscanf(cmd, "$MODE:TURN:%d,%d#", &angle, &angularVel) == 2){
+        Chassis_Turn(angle, angularVel);
+    }
+    else if(strcmp(cmd, "$MODE:STOP#") == 0){
+        Chassis_Stop();
+    }
+    else if(strcmp(cmd, "$MODE:DATAINFO#") == 0){
+        Chassis_GetData(&chassisParam);
+        _INFO("Chassis Data:[LF Enc, LF Spd; RF Enc, RF Spd;LR Enc, LR Spd;RR Enc, RR Spd] = %d, %d, %d, %d, %d, %d, %d, %d", 
+              chassisParam.encorder10ms[CHASSIS_WHEEL_LF], 
+              chassisParam.encorder10ms[CHASSIS_WHEEL_RF], 
+              chassisParam.encorder10ms[CHASSIS_WHEEL_LR], 
+              chassisParam.encorder10ms[CHASSIS_WHEEL_RR],
+              chassisParam.encorderSpeed[CHASSIS_WHEEL_LF], 
+              chassisParam.encorderSpeed[CHASSIS_WHEEL_RF], 
+              chassisParam.encorderSpeed[CHASSIS_WHEEL_LR], 
+              chassisParam.encorderSpeed[CHASSIS_WHEEL_RR]);
     }
 	else if(sscanf(cmd, "$PID:%f,%f,%f", &p, &i, &d) == 3){
         jy61pYawPID.p = p;

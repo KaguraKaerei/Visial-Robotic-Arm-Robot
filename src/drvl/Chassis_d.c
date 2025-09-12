@@ -12,6 +12,7 @@
 ChassisParam_t chassisParam;
 PID_Param_t selfCtrlPID[CHASSIS_WHEEL_MAX];
 JY61P_Data_t jy61pData;
+PID_Param_t jy61pYawPID_selfCtrl;
 PID_Param_t jy61pYawPID;
 
 /* ========================= 私 有 函 数 声 明 ========================= */
@@ -31,17 +32,15 @@ void Chassis_Init(void)
     // 初始化串口
     iUSART_Init(iUSART3, USART_MODE_BASIC);
     // 配置底盘
-    // USART_Printf(USART3, "$flash_reset#");      // 重置参数
+    USART_Printf(USART3, "$flash_reset#");      // 重置参数
     USART_Printf(USART3, "$mtype:1#");          // 520电机
     // USART_Printf(USART3, "$deadzone:#");        // PWM死区
     USART_Printf(USART3, "$mline:11#");         // 分辨率
     USART_Printf(USART3, "$mphase:56#");        // 减速比
     USART_Printf(USART3, "$wdiameter:85#");     // 轮子直径
     
-    // chassisParam.p = 0.01f;
-    // chassisParam.i = 0.0f;
-    // chassisParam.d = 0.0f;
-    // Chassis_SetPID(&chassisParam);
+    PID_Init(&jy61pYawPID);
+    PID_SetPID(&jy61pYawPID, 2.0f, 0.01f, 0.5f);
 }
 /**
  * @brief 设置底盘速度
@@ -57,10 +56,6 @@ void Chassis_SetSpeed(const ChassisParam_t* const param)
                                                 param->speed[CHASSIS_WHEEL_RF],
                                                 param->speed[CHASSIS_WHEEL_LR],
                                                 param->speed[CHASSIS_WHEEL_RR]);
-    _INFO("Chassis speed set: LF=%d, RF=%d, LR=%d, RR=%d", param->speed[CHASSIS_WHEEL_LF],
-                                                            param->speed[CHASSIS_WHEEL_RF],
-                                                            param->speed[CHASSIS_WHEEL_LR],
-                                                            param->speed[CHASSIS_WHEEL_RR]);
 }
 /**
  * @brief 设置底盘PWM
@@ -76,10 +71,6 @@ void Chassis_SetPWM(const ChassisParam_t* const param)
                                         param->pwm[CHASSIS_WHEEL_RF],
                                         param->pwm[CHASSIS_WHEEL_LR],
                                         param->pwm[CHASSIS_WHEEL_RR]);
-    _INFO("Chassis PWM set: LF=%u, RF=%u, LR=%u, RR=%u", param->pwm[CHASSIS_WHEEL_LF],
-                                                    param->pwm[CHASSIS_WHEEL_RF],
-                                                    param->pwm[CHASSIS_WHEEL_LR],
-                                                    param->pwm[CHASSIS_WHEEL_RR]);
 }
 /**
  * @brief 设置底盘PID
@@ -92,7 +83,6 @@ void Chassis_SetPID(const ChassisParam_t* const param)
         return;
     }
     USART_Printf(USART3, "$MPID:%f,%f,%f#", param->p, param->i, param->d);
-    _INFO("Chassis PID set: P=%f, I=%f, D=%f", param->p, param->i, param->d);
 }
 /**
  * @brief 获取底盘数据
@@ -149,22 +139,10 @@ void Chassis_GetData(ChassisParam_t* const param)
                                         &param->encorderSpeed[CHASSIS_WHEEL_RF], 
                                         &param->encorderSpeed[CHASSIS_WHEEL_LR], 
                                         &param->encorderSpeed[CHASSIS_WHEEL_RR]);
-    _INFO("Chassis_GetEncorderAll: LF=%d, RF=%d, LR=%d, RR=%d", param->encorderAll[CHASSIS_WHEEL_LF], 
-                                                                param->encorderAll[CHASSIS_WHEEL_RF], 
-                                                                param->encorderAll[CHASSIS_WHEEL_LR], 
-                                                                param->encorderAll[CHASSIS_WHEEL_RR]);
-    _INFO("Chassis_GetEncorder10ms: LF=%d, RF=%d, LR=%d, RR=%d", param->encorder10ms[CHASSIS_WHEEL_LF], 
-                                                                param->encorder10ms[CHASSIS_WHEEL_RF], 
-                                                                param->encorder10ms[CHASSIS_WHEEL_LR], 
-                                                                param->encorder10ms[CHASSIS_WHEEL_RR]);
-    _INFO("Chassis_GetSpeed: LF=%d, RF=%d, LR=%d, RR=%d", param->encorderSpeed[CHASSIS_WHEEL_LF], 
-                                                        param->encorderSpeed[CHASSIS_WHEEL_RF], 
-                                                        param->encorderSpeed[CHASSIS_WHEEL_LR], 
-                                                        param->encorderSpeed[CHASSIS_WHEEL_RR]);
 }
 /**
  * @brief 移动底盘
- * @param linearVel 线速度
+ * @param linearVel 线速度(cm/s)
  * @param angularVel 角速度(度/秒)
  */
 void Chassis_Move(int linearVel, int angularVel)
@@ -198,21 +176,43 @@ void Chassis_GoStraight(int speed)
  * @param angle 角度(单位度, 顺时针>0, 逆时针<0)
  * @param angularVel 角速度(度/秒)
  */
+// void Chassis_Turn(int angle, int angularVel)
+// {
+//     if(angularVel == 0){
+//         _WARN("Chassis_Turn: angularVel is zero! Please use Chassis_GoStraight.");
+//         return;
+//     }
+//     uint32_t duration = (angle * 1000 < 0) ? (-angle * 1000 / angularVel) : (angle * 1000 / angularVel);
+//     Chassis_Move(0, angularVel);
+
+//     Delay_ms(duration);
+
+//     Chassis_Stop();
+// }
 void Chassis_Turn(int angle, int angularVel)
 {
     if(angularVel == 0){
         _WARN("Chassis_Turn: angularVel is zero! Please use Chassis_GoStraight.");
         return;
     }
-    // uint32_t duration = (angle * 1000 < 0) ? (-angle * 1000 / angularVel) : (angle * 1000 / angularVel);
-    Chassis_Move(0, angularVel);
 
+    // PID闭环
+    JY61p_GetData(&jy61pData);
     int targetAngle = jy61pData.angle_z + angle;
+    while(targetAngle >= 360) targetAngle -= 360;
+    while(targetAngle < 0) targetAngle += 360;
+    uint8_t timeout = 100;
+
     do{
         JY61p_GetData(&jy61pData);
-        // Delay_us(100);
+        int err = targetAngle - jy61pData.angle_z;
+        PID_Controller(&jy61pYawPID, 0, err, 0.001f);
+        angularVel = (int)jy61pYawPID.output;
+        Chassis_Move(0, angularVel);
+        Delay_ms(1);
+        --timeout;
     }
-	while(targetAngle - jy61pData.angle_z > 1 || targetAngle - jy61pData.angle_z < -1);
+    while(timeout && (targetAngle - jy61pData.angle_z > 1 || targetAngle - jy61pData.angle_z < -1));
 
     Chassis_Stop();
 }
@@ -226,9 +226,9 @@ void Chassis_SelfCtrl_Init(void)
         PID_SetPID(&selfCtrlPID[i], 0.1f, 0.001f, 0.05f);
         PID_SetLimit(&selfCtrlPID[i], 50.0f, 200.0f);
     }
-    PID_Init(&jy61pYawPID);
-    PID_SetPID(&jy61pYawPID, 2.0f, 0.01f, 0.5f);
-    PID_SetLimit(&jy61pYawPID, 80.0f, 300.0f);
+    PID_Init(&jy61pYawPID_selfCtrl);
+    PID_SetPID(&jy61pYawPID_selfCtrl, 2.0f, 0.01f, 0.5f);
+    PID_SetLimit(&jy61pYawPID_selfCtrl, 80.0f, 300.0f);
 }
 /**
  * @brief 非驱动板闭环控制移动
@@ -299,11 +299,9 @@ void Chassis_SelfCtrl_Turn_JY61(uint8_t relativeFlag, int targetAngle, uint8_t t
         JY61p_GetData(jyData);
         currentAngle = jyData->angle_z;
         float err = targetAngle - currentAngle;
-        while(err > 180.0f) err -= 360.0f;
-        while(err < -180.0f) err += 360.0f;
 
-        PID_Controller(&jy61pYawPID, 0, err, 0.01f);
-        int targetAngularVel = (int)jy61pYawPID.output;
+        PID_Controller(&jy61pYawPID_selfCtrl, 0, err, 0.01f);
+        int targetAngularVel = (int)jy61pYawPID_selfCtrl.output;
         Chassis_SelfCtrl_Move(0, targetAngularVel);
         Delay_ms(10);
     }
@@ -330,25 +328,20 @@ static void Chassis_DifferentialIK(ChassisParam_t* const param)
         _WARN("Chassis_DifferentialIK: param is NULL");
         return;
     }
-
     // 逆运动学解算
     float leftVel = param->linearVel - (param->angularVel * CHASSIS_WHEEL_TRACK / 2.0f);
     float rightVel = param->linearVel + (param->angularVel * CHASSIS_WHEEL_TRACK / 2.0f);
     // 速度限幅
     leftVel = leftVel > CHASSIS_MAX_SPEED ? CHASSIS_MAX_SPEED : (leftVel < -CHASSIS_MAX_SPEED ? -CHASSIS_MAX_SPEED : leftVel);
     rightVel = rightVel > CHASSIS_MAX_SPEED ? CHASSIS_MAX_SPEED : (rightVel < -CHASSIS_MAX_SPEED ? -CHASSIS_MAX_SPEED : rightVel);
-
-    // 写入数据
+    // cm/s 转换为 mm/s
+    leftVel *= 10;
+    rightVel *= 10;
+    // 写入数据(mm/s)
     param->speed[CHASSIS_WHEEL_LF] = (int)leftVel;
     param->speed[CHASSIS_WHEEL_RF] = (int)rightVel;
     param->speed[CHASSIS_WHEEL_LR] = (int)leftVel;
     param->speed[CHASSIS_WHEEL_RR] = (int)rightVel;
-    // 打印
-    _INFO("Chassis_DifferentialIK: LF=%d, RF=%d, LR=%d, RR=%d", 
-          param->speed[CHASSIS_WHEEL_LF], 
-          param->speed[CHASSIS_WHEEL_RF], 
-          param->speed[CHASSIS_WHEEL_LR], 
-          param->speed[CHASSIS_WHEEL_RR]);
 }
 /**
  * @brief 差速驱动正运动学解算
@@ -361,12 +354,14 @@ static void Chassis_DifferentialFK(ChassisParam_t* const param)
         _WARN("Chassis_DifferentialFK: param is NULL");
         return;
     }
-
+    // 获取数据
+    Chassis_GetData(param);
+    for(uint8_t i = CHASSIS_WHEEL_LF; i < CHASSIS_WHEEL_MAX; ++i){
+        param->encorderSpeed[i] = param->encorder10ms[i] * CHASSIS_WHEEL_PERIMETER / 24.64f;
+    }
     // 正运动学解算
     param->linearVel = (param->encorderSpeed[CHASSIS_WHEEL_RF] + param->encorderSpeed[CHASSIS_WHEEL_LF]) / 2.0f;
     param->angularVel = (param->encorderSpeed[CHASSIS_WHEEL_RF] - param->encorderSpeed[CHASSIS_WHEEL_LF]) / CHASSIS_WHEEL_TRACK;
-    // 打印
-    _INFO("Chassis_DifferentialFK: linearVel=%d, angularVel=%d", (int)param->linearVel, (int)param->angularVel);
 }
 /**
  * @brief 非驱动板闭环控制
@@ -381,7 +376,7 @@ static void Chassis_SelfCtrl(ChassisParam_t* const param)
     // 获取数据
     Chassis_GetData(param);
     for(uint8_t i = CHASSIS_WHEEL_LF; i < CHASSIS_WHEEL_MAX; ++i){
-        param->encorderSpeed[i] = param->encorder10ms[i] * CHASSIS_WHEEL_PERIMETER / 600.0f;
+        param->encorderSpeed[i] = param->encorder10ms[i] * CHASSIS_WHEEL_PERIMETER / 24.64f;
     }
     // 计算PWM
     for(uint8_t i = CHASSIS_WHEEL_LF; i < CHASSIS_WHEEL_MAX; ++i){
