@@ -10,7 +10,8 @@
             "main.h": "c",
             "sysmanager_a.h": "c",
             "log_s.h": "c",
-            "uart.h": "c"
+            "uart.h": "c",
+            "visionprotocol.h": "c"
         }
     },
     "extensions": {}

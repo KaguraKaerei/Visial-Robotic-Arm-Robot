@@ -75,6 +75,7 @@ static void SysManager_InitHardware(void)
 
     // 串口通信
     iUSART_Init(iUSART1, USART_MODE_BASIC);  // 蓝牙
+    iUSART_Init(iUSART2, USART_MODE_BASIC);  // 云台
     iUSART_Init(iUSART3, USART_MODE_BASIC);  // 底盘
 }
 

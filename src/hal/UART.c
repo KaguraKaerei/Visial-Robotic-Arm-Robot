@@ -1,6 +1,8 @@
 #include "UART.h"
 #include <stdarg.h>
 
+#define NO_IRQn ((IRQn_Type)-1)
+
 /* 串口初始化配置表 */
 typedef struct{
     iUSART_t USART;
@@ -13,7 +15,7 @@ typedef struct{
 const USART_Config_t USART_Config[] = {
     {iUSART1, USART_MODE_BASIC, RCC_APB2Periph_USART1, USART1, USART1_IRQn, 115200},
     {iUSART2, USART_MODE_BASIC, RCC_APB1Periph_USART2, USART2, USART2_IRQn, 115200},
-    {iUSART3, USART_MODE_BASIC, RCC_APB1Periph_USART3, USART3, NULL, 115200}
+    {iUSART3, USART_MODE_BASIC, RCC_APB1Periph_USART3, USART3, NO_IRQn, 115200}
 };
 /* 私有函数声明 */
 static void USART_SendString(USART_TypeDef* USARTx, const char* str);
@@ -111,7 +113,7 @@ void iUSART_Init(iUSART_t USART, USART_Mode_t mode)
         USART_HalfDuplexCmd(config->USARTx, ENABLE);
     }
     // NVIC初始化配置
-    if(config->IRQn != NULL){
+    if(config->IRQn != NO_IRQn){
         USART_ClearFlag(config->USARTx, USART_FLAG_RXNE);
         USART_ITConfig(config->USARTx, USART_IT_RXNE, ENABLE);
         NVIC_InitTypeDef NVIC_InitStructure;

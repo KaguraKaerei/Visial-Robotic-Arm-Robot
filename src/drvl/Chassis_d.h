@@ -42,6 +42,7 @@ void Chassis_Move(int linearVel, int angularVel);
 void Chassis_Stop(void);
 void Chassis_GoStraight(int speed);
 void Chassis_Turn(int angle, int angularVel);
+void Chassis_Turn_JY61P(int angle);
 
 void Chassis_SelfCtrl_Init(void);
 void Chassis_SelfCtrl_Move(int linearVel, int angularVel);

@@ -80,6 +80,8 @@ static void BlueTooth_Parse(const char* cmd)
 {
     float p, i, d;
     int speed, angle, angularVel;
+    int dataInfoFlag = 0;
+
     if(!cmd){
         _WARN("BlueTooth_Parse: cmd is NULL");
         return;
@@ -93,17 +95,30 @@ static void BlueTooth_Parse(const char* cmd)
     else if(strcmp(cmd, "$MODE:STOP#") == 0){
         Chassis_Stop();
     }
-    else if(strcmp(cmd, "$MODE:DATAINFO#") == 0){
+    else if(sscanf(cmd, "$MODE:DATAINFO:%d#", &dataInfoFlag) == 1 ||
+            sscanf(cmd, "$MODE:DATAINFO:%d:%d#", &dataInfoFlag, &speed) == 2 ||
+            sscanf(cmd, "$MODE:DATAINFO:%d:%d,%d#", &dataInfoFlag, &angle, &angularVel) == 3){
+        switch(dataInfoFlag)
+        {
+            case 0: break;
+            case 1:
+                Chassis_GoStraight(speed);
+                break;
+            case 2:
+                Chassis_Turn(angle, angularVel);
+                break;
+            case 3:
+                Chassis_Turn_JY61P(angle);
+                break;
+        }
         Chassis_GetData(&chassisParam);
-        _INFO("Chassis Data:[LF Enc, LF Spd; RF Enc, RF Spd;LR Enc, LR Spd;RR Enc, RR Spd] = %d, %d, %d, %d, %d, %d, %d, %d", 
-              chassisParam.encorder10ms[CHASSIS_WHEEL_LF], 
-              chassisParam.encorder10ms[CHASSIS_WHEEL_RF], 
-              chassisParam.encorder10ms[CHASSIS_WHEEL_LR], 
-              chassisParam.encorder10ms[CHASSIS_WHEEL_RR],
-              chassisParam.encorderSpeed[CHASSIS_WHEEL_LF], 
-              chassisParam.encorderSpeed[CHASSIS_WHEEL_RF], 
-              chassisParam.encorderSpeed[CHASSIS_WHEEL_LR], 
-              chassisParam.encorderSpeed[CHASSIS_WHEEL_RR]);
+        _INFO(  "Chassis: [LF, RF, LR, RR][10ms, speed]: "
+                "%d, %d, %d, %d, "
+                "%d, %d, %d, %d  ",
+              chassisParam.encorder10ms[0], chassisParam.encorderSpeed[0],
+              chassisParam.encorder10ms[1], chassisParam.encorderSpeed[1], 
+              chassisParam.encorder10ms[2], chassisParam.encorderSpeed[2],
+              chassisParam.encorder10ms[3], chassisParam.encorderSpeed[3]);
     }
 	else if(sscanf(cmd, "$PID:%f,%f,%f", &p, &i, &d) == 3){
         jy61pYawPID.p = p;

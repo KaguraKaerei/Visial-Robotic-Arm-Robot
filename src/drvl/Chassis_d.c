@@ -5,8 +5,8 @@
 #include "PID_s.h"
 
 #define CHASSIS_WHEEL_PERIMETER     26.69       // 轮周长(cm)
-#define CHASSIS_WHEEL_TRACK         140.0f      // 轮距
-#define CHASSIS_MAX_SPEED           1000        // 最大速度
+#define CHASSIS_WHEEL_TRACK         18.18f      // 轮距(cm)
+#define CHASSIS_MAX_SPEED           100         // 最大速度(cm/s)
 #define PI                          3.14159f
 
 ChassisParam_t chassisParam;
@@ -20,7 +20,6 @@ PID_Param_t jy61pYawPID;
 static void Chassis_DifferentialIK(ChassisParam_t* const param);
 static void Chassis_DifferentialFK(ChassisParam_t* const param);
 static void Chassis_SelfCtrl(ChassisParam_t* const param);
-
 
 /* ========================= 接 口 函 数 实 现 ========================= */
 
@@ -122,6 +121,7 @@ void Chassis_GetData(ChassisParam_t* const param)
             --timeout;
         }
     }
+    _INFO("Chassis_GetData: recv %s, %s, %s", res[0], res[1], res[2]);
     if(timeout == 0){
         _WARN("Chassis_GetData: timeout");
         return;
@@ -139,6 +139,37 @@ void Chassis_GetData(ChassisParam_t* const param)
                                         &param->encorderSpeed[CHASSIS_WHEEL_RF], 
                                         &param->encorderSpeed[CHASSIS_WHEEL_LR], 
                                         &param->encorderSpeed[CHASSIS_WHEEL_RR]);
+    // USART_Printf(USART3, "$upload:0,1,0#");
+    // char res[32] = {0};
+    // uint8_t index = 0;
+    // uint32_t timeout = 10000;
+    // while(timeout > 0){
+    //     if(USART_GetFlagStatus(USART3, USART_FLAG_RXNE) == SET){
+    //         char ch = USART_ReceiveData(USART3);
+    //         if(index < sizeof(res) - 1){
+    //             res[index++] = ch;
+    //         }
+    //         if(ch == '#' || index >= sizeof(res) - 1){
+    //             res[index] = '\0';
+    //             index = 0;
+    //             break;
+    //         }
+    //     }
+    //     else{
+    //         Delay_us(100);
+    //         --timeout;
+    //     }
+    // }
+    // _INFO("Chassis_GetData: recv %s", res);
+    // if(timeout == 0){
+    //     _WARN("Chassis_GetData: timeout");
+    //     return;
+    // }
+    // // 解析接收的数据
+    // sscanf(res, "$MALL:%d,%d,%d,%d#", &param->encorderAll[CHASSIS_WHEEL_LF], 
+    //                                     &param->encorderAll[CHASSIS_WHEEL_RF], 
+    //                                     &param->encorderAll[CHASSIS_WHEEL_LR], 
+    //                                     &param->encorderAll[CHASSIS_WHEEL_RR]);
 }
 /**
  * @brief 移动底盘
@@ -173,46 +204,52 @@ void Chassis_GoStraight(int speed)
 }
 /**
  * @brief 转向运动
- * @param angle 角度(单位度, 顺时针>0, 逆时针<0)
+ * @param angle 角度(单位度, 顺时针<0, 逆时针>0)
  * @param angularVel 角速度(度/秒)
  */
-// void Chassis_Turn(int angle, int angularVel)
-// {
-//     if(angularVel == 0){
-//         _WARN("Chassis_Turn: angularVel is zero! Please use Chassis_GoStraight.");
-//         return;
-//     }
-//     uint32_t duration = (angle * 1000 < 0) ? (-angle * 1000 / angularVel) : (angle * 1000 / angularVel);
-//     Chassis_Move(0, angularVel);
-
-//     Delay_ms(duration);
-
-//     Chassis_Stop();
-// }
 void Chassis_Turn(int angle, int angularVel)
 {
     if(angularVel == 0){
         _WARN("Chassis_Turn: angularVel is zero! Please use Chassis_GoStraight.");
         return;
     }
+    uint32_t duration = (angle * 1000 < 0) ? (-angle * 1000 / angularVel) : (angle * 1000 / angularVel);
+    Chassis_Move(0, angularVel);
 
+    Delay_ms(duration);
+
+    Chassis_Stop();
+}
+/**
+ * @brief 角度闭环转向运动
+ * @param angle:角度
+ */
+void Chassis_Turn_JY61P(int angle)
+{
     // PID闭环
     JY61p_GetData(&jy61pData);
-    int targetAngle = jy61pData.angle_z + angle;
+    int currentAngle = jy61pData.angle_z;
+    int targetAngle = currentAngle + angle;
     while(targetAngle >= 360) targetAngle -= 360;
     while(targetAngle < 0) targetAngle += 360;
-    uint8_t timeout = 100;
+
+    uint16_t timeout = 500;
 
     do{
         JY61p_GetData(&jy61pData);
-        int err = targetAngle - jy61pData.angle_z;
-        PID_Controller(&jy61pYawPID, 0, err, 0.001f);
-        angularVel = (int)jy61pYawPID.output;
-        Chassis_Move(0, angularVel);
+        currentAngle = jy61pData.angle_z;
+        int err = targetAngle - currentAngle;
+        // 取最短路径
+        while(err > 180) err -= 360;
+        while(err < -180) err += 360;
+
+        PID_Controller(&jy61pYawPID, 0, err, 0.001f);       // 1ms周期
+        int outAngularVel = (int)jy61pYawPID.output;
+
+        Chassis_Move(0, outAngularVel);
         Delay_ms(1);
-        --timeout;
     }
-    while(timeout && (targetAngle - jy61pData.angle_z > 1 || targetAngle - jy61pData.angle_z < -1));
+    while(--timeout && (currentAngle - targetAngle > 1 || currentAngle - targetAngle < -1));
 
     Chassis_Stop();
 }
@@ -334,10 +371,10 @@ static void Chassis_DifferentialIK(ChassisParam_t* const param)
     // 速度限幅
     leftVel = leftVel > CHASSIS_MAX_SPEED ? CHASSIS_MAX_SPEED : (leftVel < -CHASSIS_MAX_SPEED ? -CHASSIS_MAX_SPEED : leftVel);
     rightVel = rightVel > CHASSIS_MAX_SPEED ? CHASSIS_MAX_SPEED : (rightVel < -CHASSIS_MAX_SPEED ? -CHASSIS_MAX_SPEED : rightVel);
-    // cm/s 转换为 mm/s
-    leftVel *= 10;
-    rightVel *= 10;
-    // 写入数据(mm/s)
+    // TODO： cm/s 转换为 车板单位+补偿系数
+    leftVel *= 27;
+    rightVel *= 27;
+    // 写入数据(cm/s -> 车板单位+补偿系数)
     param->speed[CHASSIS_WHEEL_LF] = (int)leftVel;
     param->speed[CHASSIS_WHEEL_RF] = (int)rightVel;
     param->speed[CHASSIS_WHEEL_LR] = (int)leftVel;
