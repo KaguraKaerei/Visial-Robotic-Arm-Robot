@@ -214,6 +214,7 @@ void Chassis_Turn(int angle, int angularVel)
         return;
     }
     uint32_t duration = (angle * 1000 < 0) ? (-angle * 1000 / angularVel) : (angle * 1000 / angularVel);
+    if(angle < 0) angularVel = -angularVel;
     Chassis_Move(0, angularVel);
 
     Delay_ms(duration);
@@ -282,6 +283,13 @@ void Chassis_SelfCtrl_Move(int linearVel, int angularVel)
     Chassis_DifferentialIK(&chassisParam);
     // 自解算闭环控制速度
     Chassis_SelfCtrl(&chassisParam);
+}
+/**
+ * @brief 非驱动板闭环控制停止
+ */
+void Chassis_SelfCtrl_Stop(void)
+{
+    Chassis_SelfCtrl_Move(0, 0);
 }
 /**
  * @brief 非驱动板闭环控制直线移动

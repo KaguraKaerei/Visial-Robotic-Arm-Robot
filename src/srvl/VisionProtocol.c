@@ -1,6 +1,7 @@
 #include "VisionProtocol.h"
 #include "UART.h"
 #include <string.h>
+#include "LOG_s.h"
 #include "Chassis_d.h"
 
 /* ========================= 私 有 变 量 声 明 ========================= */
@@ -46,7 +47,7 @@ void VisionProtocol_Process(void)
 
 static void VisionProtocol_RX_Callback(void)
 {
-    uint8_t res[32] = {0};
+    char res[32] = {0};
     uint8_t index = 0;
     uint8_t receiving = 0;
     while(USART_GetFlagStatus(USART2, USART_FLAG_RXNE) == SET){
@@ -90,16 +91,16 @@ static void VisionProtocol_Parse(const char* cmd)
         _WARN("VisionProtocol_Parse: cmd is NULL");
         return;
     }
-    if(strcmp(cmd, "$Trail:GO") == 0){
+    if(strcmp(cmd, "$TRACK:GO") == 0){
         visionState = VISION_STATE_GO;
     }
-    else if(strcmp(cmd, "$Trail:STOP") == 0){
+    else if(strcmp(cmd, "$TRACK:STOP") == 0){
         visionState = VISION_STATE_STOP;
     }
-    else if(strcmp(cmd, "$Trail:LEFT") == 0){
+    else if(strcmp(cmd, "$TRACK:LEFT") == 0){
         visionState = VISION_STATE_LEFT;
     }
-    else if(strcmp(cmd, "$Trail:RIGHT") == 0){
+    else if(strcmp(cmd, "$TRACK:RIGHT") == 0){
         visionState = VISION_STATE_RIGHT;
     }
     else{

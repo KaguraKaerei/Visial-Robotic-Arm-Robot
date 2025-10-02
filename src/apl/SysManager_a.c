@@ -93,4 +93,6 @@ static void SysManager_InitModules(void)
     BlueTooth_Init();
     // 陀螺仪
     JY61p_Init();
+    // 视觉
+    VisionProtocol_Init();
 }

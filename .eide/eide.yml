@@ -1,0 +1,360 @@
+version: "4.1"
+name: Project
+type: ARM
+deviceName: null
+packDir: null
+srcDirs:
+  - src
+virtualFolder:
+  name: <virtual_root>
+  files: []
+  folders:
+    - name: Library
+      files:
+        - path: lib/Library/misc.c
+        - path: lib/Library/stm32f10x_adc.c
+        - path: lib/Library/stm32f10x_bkp.c
+        - path: lib/Library/stm32f10x_can.c
+        - path: lib/Library/stm32f10x_cec.c
+        - path: lib/Library/stm32f10x_crc.c
+        - path: lib/Library/stm32f10x_dac.c
+        - path: lib/Library/stm32f10x_dbgmcu.c
+        - path: lib/Library/stm32f10x_dma.c
+        - path: lib/Library/stm32f10x_exti.c
+        - path: lib/Library/stm32f10x_flash.c
+        - path: lib/Library/stm32f10x_fsmc.c
+        - path: lib/Library/stm32f10x_gpio.c
+        - path: lib/Library/stm32f10x_i2c.c
+        - path: lib/Library/stm32f10x_iwdg.c
+        - path: lib/Library/stm32f10x_pwr.c
+        - path: lib/Library/stm32f10x_rcc.c
+        - path: lib/Library/stm32f10x_rtc.c
+        - path: lib/Library/stm32f10x_sdio.c
+        - path: lib/Library/stm32f10x_spi.c
+        - path: lib/Library/stm32f10x_tim.c
+        - path: lib/Library/stm32f10x_usart.c
+        - path: lib/Library/stm32f10x_wwdg.c
+        - path: lib/Library/misc.h
+        - path: lib/Library/stm32f10x_adc.h
+        - path: lib/Library/stm32f10x_bkp.h
+        - path: lib/Library/stm32f10x_can.h
+        - path: lib/Library/stm32f10x_cec.h
+        - path: lib/Library/stm32f10x_crc.h
+        - path: lib/Library/stm32f10x_dac.h
+        - path: lib/Library/stm32f10x_dbgmcu.h
+        - path: lib/Library/stm32f10x_dma.h
+        - path: lib/Library/stm32f10x_exti.h
+        - path: lib/Library/stm32f10x_flash.h
+        - path: lib/Library/stm32f10x_fsmc.h
+        - path: lib/Library/stm32f10x_gpio.h
+        - path: lib/Library/stm32f10x_i2c.h
+        - path: lib/Library/stm32f10x_iwdg.h
+        - path: lib/Library/stm32f10x_pwr.h
+        - path: lib/Library/stm32f10x_rcc.h
+        - path: lib/Library/stm32f10x_rtc.h
+        - path: lib/Library/stm32f10x_sdio.h
+        - path: lib/Library/stm32f10x_spi.h
+        - path: lib/Library/stm32f10x_tim.h
+        - path: lib/Library/stm32f10x_usart.h
+        - path: lib/Library/stm32f10x_wwdg.h
+      folders: []
+    - name: Start
+      files:
+        - path: lib/Start/startup_stm32f10x_md.s
+        - path: lib/Start/core_cm3.c
+        - path: lib/Start/system_stm32f10x.c
+        - path: lib/Start/core_cm3.h
+        - path: lib/Start/stm32f10x.h
+        - path: lib/Start/system_stm32f10x.h
+      folders: []
+    - name: User
+      files:
+        - path: lib/User/stm32f10x_it.c
+        - path: lib/User/stm32f10x_conf.h
+        - path: lib/User/stm32f10x_it.h
+      folders: []
+dependenceList: []
+outDir: build
+miscInfo:
+  uid: 4b34e17393db60334ca2943a3cbdb2e6
+targets:
+  Debug:
+    cppPreprocessAttrs:
+      defineList:
+        - USE_STDPERIPH_DRIVER
+        - STM32F10X_MD
+      incList:
+        - lib/Library
+        - lib/Start
+        - lib/User
+        - src/hal
+        - src/drvl
+        - src/srvl
+        - src/apl
+        - .cmsis/include
+        - RTE/_Target 1
+      libList: []
+    excludeList:
+      - <virtual_root>/apl
+    toolchain: AC5
+    toolchainConfigMap:
+      AC5:
+        archExtensions: ""
+        cpuType: Cortex-M3
+        floatingPointHardware: none
+        options:
+          version: 4
+          afterBuildTasks: []
+          asm-compiler: {}
+          beforeBuildTasks: []
+          c/cpp-compiler:
+            CXX_FLAGS: --no-multibyte-chars
+            C_FLAGS: --no-multibyte-chars
+            c99-mode: true
+            one-elf-section-per-function: true
+            optimization: level-0
+            warnings: all-warnings
+          global:
+            output-debug-info: enable
+          linker:
+            $outputTaskExcludes:
+              - .bin
+            output-format: elf
+            ro-base: "0x08000000"
+            rw-base: "0x20000000"
+        scatterFilePath: ""
+        storageLayout:
+          RAM:
+            - id: 1
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: RAM
+            - id: 2
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: RAM
+            - id: 3
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: RAM
+            - id: 1
+              isChecked: true
+              mem:
+                size: "0x5000"
+                startAddr: "0x20000000"
+              noInit: false
+              tag: IRAM
+            - id: 2
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: IRAM
+          ROM:
+            - id: 1
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: ROM
+            - id: 2
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: ROM
+            - id: 3
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: ROM
+            - id: 1
+              isChecked: true
+              isStartup: true
+              mem:
+                size: "0x10000"
+                startAddr: "0x8000000"
+              tag: IROM
+            - id: 2
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: IROM
+        useCustomScatterFile: false
+    uploadConfigMap:
+      JLink:
+        baseAddr: ""
+        bin: ""
+        cpuInfo:
+          cpuName: "null"
+          vendor: "null"
+        otherCmds: ""
+        proType: 1
+        speed: 8000
+      STLink:
+        address: "0x8000000"
+        bin: ""
+        elFile: None
+        optionBytes: .eide/debug.st.option.bytes.ini
+        otherCmds: ""
+        proType: SWD
+        resetMode: default
+        runAfterProgram: true
+        speed: 4000
+    uploader: STLink
+  Target 1:
+    cppPreprocessAttrs:
+      defineList:
+        - USE_STDPERIPH_DRIVER
+        - STM32F10X_MD
+      incList:
+        - lib/Library
+        - lib/Start
+        - lib/User
+        - src/hal
+        - src/drvl
+        - src/srvl
+        - src/apl
+        - .cmsis/include
+        - RTE/_Target 1
+      libList: []
+    excludeList:
+      - <virtual_root>/apl
+    toolchain: AC5
+    toolchainConfigMap:
+      AC5:
+        archExtensions: ""
+        cpuType: Cortex-M3
+        floatingPointHardware: none
+        options:
+          version: 4
+          afterBuildTasks: []
+          asm-compiler: {}
+          beforeBuildTasks: []
+          c/cpp-compiler:
+            CXX_FLAGS: --no-multibyte-chars
+            C_FLAGS: --no-multibyte-chars
+            c99-mode: true
+            one-elf-section-per-function: true
+            optimization: level-0
+            warnings: all-warnings
+          global:
+            output-debug-info: enable
+          linker:
+            $outputTaskExcludes:
+              - .bin
+            output-format: elf
+            ro-base: "0x08000000"
+            rw-base: "0x20000000"
+        scatterFilePath: ""
+        storageLayout:
+          RAM:
+            - id: 1
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: RAM
+            - id: 2
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: RAM
+            - id: 3
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: RAM
+            - id: 1
+              isChecked: true
+              mem:
+                size: "0x5000"
+                startAddr: "0x20000000"
+              noInit: false
+              tag: IRAM
+            - id: 2
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: IRAM
+          ROM:
+            - id: 1
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: ROM
+            - id: 2
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: ROM
+            - id: 3
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: ROM
+            - id: 1
+              isChecked: true
+              isStartup: true
+              mem:
+                size: "0x10000"
+                startAddr: "0x8000000"
+              tag: IROM
+            - id: 2
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: IROM
+        useCustomScatterFile: false
+    uploadConfigMap:
+      JLink:
+        baseAddr: ""
+        bin: ""
+        cpuInfo:
+          cpuName: "null"
+          vendor: "null"
+        otherCmds: ""
+        proType: 1
+        speed: 8000
+      STLink:
+        address: "0x8000000"
+        bin: ""
+        elFile: None
+        optionBytes: .eide/target 1.st.option.bytes.ini
+        otherCmds: ""
+        proType: SWD
+        resetMode: default
+        runAfterProgram: true
+        speed: 4000
+    uploader: STLink

@@ -46,6 +46,7 @@ void Chassis_Turn_JY61P(int angle);
 
 void Chassis_SelfCtrl_Init(void);
 void Chassis_SelfCtrl_Move(int linearVel, int angularVel);
+void Chassis_SelfCtrl_Stop(void);
 void Chassis_SelfCtrl_GoStraight(int speed);
 void Chassis_SelfCtrl_Turn(int angle, int angularVel);
 void Chassis_SelfCtrl_Turn_JY61(uint8_t relativeFlag, int targetAngle, uint8_t tolerance, JY61P_Data_t* const jyData, int timeout);
