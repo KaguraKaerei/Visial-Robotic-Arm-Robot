@@ -37,7 +37,7 @@ uint8_t DWT_DelayUs(uint32_t* start_time, uint32_t interval_us)
         *start_time = 0;
         return 1;
     }
-    
+
     return 0;
 }
 /**
@@ -53,6 +53,6 @@ uint8_t sysTick_DelayMs(sysTick_t* start_time, uint32_t interval_ms)
         *start_time = 0;
         return 1;
     }
-    
+
     return 0;
 }

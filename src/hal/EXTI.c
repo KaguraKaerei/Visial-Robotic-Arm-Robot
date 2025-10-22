@@ -1,6 +1,6 @@
 #include "EXTI.h"
 
-static EXTI_Callback_t EXTI_Callback[16] = {0};
+static EXTI_Callback_t EXTI_Callback[16] = { 0 };
 
 /**
  * @brief 初始化外部中断
@@ -80,8 +80,7 @@ void EXTI_RegisterCallback(uint32_t EXTI_Line, EXTI_Callback_t callback)
  */
 void EXTI0_IRQHandler(void)
 {
-    if(EXTI_GetITStatus(EXTI_Line0) != RESET)
-    {
+    if(EXTI_GetITStatus(EXTI_Line0) != RESET){
         EXTI_ClearITPendingBit(EXTI_Line0);
         // 调用驱动层注册的回调函数
         if(EXTI_Callback[0] != 0){
@@ -91,8 +90,7 @@ void EXTI0_IRQHandler(void)
 }
 void EXTI1_IRQHandler(void)
 {
-    if(EXTI_GetITStatus(EXTI_Line1) != RESET)
-    {
+    if(EXTI_GetITStatus(EXTI_Line1) != RESET){
         EXTI_ClearITPendingBit(EXTI_Line1);
         // 调用驱动层注册的回调函数
         if(EXTI_Callback[1] != 0){
@@ -102,8 +100,7 @@ void EXTI1_IRQHandler(void)
 }
 void EXTI2_IRQHandler(void)
 {
-    if(EXTI_GetITStatus(EXTI_Line2) != RESET)
-    {
+    if(EXTI_GetITStatus(EXTI_Line2) != RESET){
         EXTI_ClearITPendingBit(EXTI_Line2);
         // 调用驱动层注册的回调函数
         if(EXTI_Callback[2] != 0){
@@ -113,8 +110,7 @@ void EXTI2_IRQHandler(void)
 }
 void EXTI3_IRQHandler(void)
 {
-    if(EXTI_GetITStatus(EXTI_Line3) != RESET)
-    {
+    if(EXTI_GetITStatus(EXTI_Line3) != RESET){
         EXTI_ClearITPendingBit(EXTI_Line3);
         // 调用驱动层注册的回调函数
         if(EXTI_Callback[3] != 0){
@@ -124,8 +120,7 @@ void EXTI3_IRQHandler(void)
 }
 void EXTI4_IRQHandler(void)
 {
-    if(EXTI_GetITStatus(EXTI_Line4) != RESET)
-    {
+    if(EXTI_GetITStatus(EXTI_Line4) != RESET){
         EXTI_ClearITPendingBit(EXTI_Line4);
         // 调用驱动层注册的回调函数
         if(EXTI_Callback[4] != 0){
@@ -135,40 +130,35 @@ void EXTI4_IRQHandler(void)
 }
 void EXTI9_5_IRQHandler(void)
 {
-    if(EXTI_GetITStatus(EXTI_Line5) != RESET)
-    {
+    if(EXTI_GetITStatus(EXTI_Line5) != RESET){
         EXTI_ClearITPendingBit(EXTI_Line5);
         // 调用驱动层注册的回调函数
         if(EXTI_Callback[5] != 0){
             EXTI_Callback[5]();
         }
     }
-    if(EXTI_GetITStatus(EXTI_Line6) != RESET)
-    {
+    if(EXTI_GetITStatus(EXTI_Line6) != RESET){
         EXTI_ClearITPendingBit(EXTI_Line6);
         // 调用驱动层注册的回调函数
         if(EXTI_Callback[6] != 0){
             EXTI_Callback[6]();
         }
     }
-    if(EXTI_GetITStatus(EXTI_Line7) != RESET)
-    {
+    if(EXTI_GetITStatus(EXTI_Line7) != RESET){
         EXTI_ClearITPendingBit(EXTI_Line7);
         // 调用驱动层注册的回调函数
         if(EXTI_Callback[7] != 0){
             EXTI_Callback[7]();
         }
     }
-    if(EXTI_GetITStatus(EXTI_Line8) != RESET)
-    {
+    if(EXTI_GetITStatus(EXTI_Line8) != RESET){
         EXTI_ClearITPendingBit(EXTI_Line8);
         // 调用驱动层注册的回调函数
         if(EXTI_Callback[8] != 0){
             EXTI_Callback[8]();
         }
     }
-    if(EXTI_GetITStatus(EXTI_Line9) != RESET)
-    {
+    if(EXTI_GetITStatus(EXTI_Line9) != RESET){
         EXTI_ClearITPendingBit(EXTI_Line9);
         // 调用驱动层注册的回调函数
         if(EXTI_Callback[9] != 0){
@@ -178,48 +168,42 @@ void EXTI9_5_IRQHandler(void)
 }
 void EXTI15_10_IRQHandler(void)
 {
-    if(EXTI_GetITStatus(EXTI_Line10) != RESET)
-    {
+    if(EXTI_GetITStatus(EXTI_Line10) != RESET){
         EXTI_ClearITPendingBit(EXTI_Line10);
         // 调用驱动层注册的回调函数
         if(EXTI_Callback[10] != 0){
             EXTI_Callback[10]();
         }
     }
-    if(EXTI_GetITStatus(EXTI_Line11) != RESET)
-    {
+    if(EXTI_GetITStatus(EXTI_Line11) != RESET){
         EXTI_ClearITPendingBit(EXTI_Line11);
         // 调用驱动层注册的回调函数
         if(EXTI_Callback[11] != 0){
             EXTI_Callback[11]();
         }
     }
-    if(EXTI_GetITStatus(EXTI_Line12) != RESET)
-    {
+    if(EXTI_GetITStatus(EXTI_Line12) != RESET){
         EXTI_ClearITPendingBit(EXTI_Line12);
         // 调用驱动层注册的回调函数
         if(EXTI_Callback[12] != 0){
             EXTI_Callback[12]();
         }
     }
-    if(EXTI_GetITStatus(EXTI_Line13) != RESET)
-    {
+    if(EXTI_GetITStatus(EXTI_Line13) != RESET){
         EXTI_ClearITPendingBit(EXTI_Line13);
         // 调用驱动层注册的回调函数
         if(EXTI_Callback[13] != 0){
             EXTI_Callback[13]();
         }
     }
-    if(EXTI_GetITStatus(EXTI_Line14) != RESET)
-    {
+    if(EXTI_GetITStatus(EXTI_Line14) != RESET){
         EXTI_ClearITPendingBit(EXTI_Line14);
         // 调用驱动层注册的回调函数
         if(EXTI_Callback[14] != 0){
             EXTI_Callback[14]();
         }
     }
-    if(EXTI_GetITStatus(EXTI_Line15) != RESET)
-    {
+    if(EXTI_GetITStatus(EXTI_Line15) != RESET){
         EXTI_ClearITPendingBit(EXTI_Line15);
         // 调用驱动层注册的回调函数
         if(EXTI_Callback[15] != 0){

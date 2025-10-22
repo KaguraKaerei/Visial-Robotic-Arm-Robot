@@ -26,8 +26,8 @@ void JY61p_I2C_Init(void)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 
     GPIO_InitTypeDef GPIO_InitStructure;
-    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_OD;
-    GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_8 | GPIO_Pin_9;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
 
@@ -52,7 +52,7 @@ void JY61p_I2C_Stop(void)
 void JY61p_I2C_SendByte(uint8_t Byte)
 {
     uint8_t i;
-    for (i = 0; i < 8; i++) {
+    for(i = 0; i < 8; i++){
         JY61p_I2C_W_SDA(!!(Byte & (0x80 >> i)));
         JY61p_I2C_W_SCL(1);
         JY61p_I2C_W_SCL(0);
@@ -63,9 +63,9 @@ uint8_t JY61p_I2C_ReceiveByte(void)
 {
     uint8_t i, Byte = 0x00;
     JY61p_I2C_W_SDA(1);
-    for (i = 0; i < 8; i++) {
+    for(i = 0; i < 8; i++){
         JY61p_I2C_W_SCL(1);
-        if (JY61p_I2C_R_SDA()) { Byte |= (0x80 >> i); }
+        if(JY61p_I2C_R_SDA()){ Byte |= (0x80 >> i); }
         JY61p_I2C_W_SCL(0);
     }
     return Byte;

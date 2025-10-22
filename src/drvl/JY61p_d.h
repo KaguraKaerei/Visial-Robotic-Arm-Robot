@@ -6,7 +6,7 @@
 #include "JY61p_Reg.h"
 
 // 数据结构体
-typedef struct {
+typedef struct{
     float acc_x;   // X轴加速度 (g)
     float acc_y;   // Y轴加速度 (g)
     float acc_z;   // Z轴加速度 (g)
@@ -22,6 +22,6 @@ typedef struct {
 uint8_t JY61p_Init(void);
 uint8_t JY61p_ReadReg(uint8_t RegAddress);
 uint8_t JY61p_Check(void);
-void JY61p_GetData(JY61P_Data_t *data);
+void JY61p_GetData(JY61P_Data_t* data);
 
 #endif

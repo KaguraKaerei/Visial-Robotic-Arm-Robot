@@ -7,6 +7,9 @@
 /* ========================= 私 有 变 量 声 明 ========================= */
 
 static VisionState_t visionState = VISION_STATE_IDLE;
+static char res[32] = { 0 };
+static uint8_t index = 0;
+static uint8_t receiving = 0;
 
 /* ========================= 私 有 函 数 声 明 ========================= */
 
@@ -18,6 +21,7 @@ static void VisionProtocol_Parse(const char* cmd);
 void VisionProtocol_Init(void)
 {
     USART_RegisterCallback(iUSART2, VisionProtocol_RX_Callback);
+    _INFO("VisionProtocol_Init: Vision protocol initialized");
 }
 
 void VisionProtocol_Process(void)
@@ -26,18 +30,22 @@ void VisionProtocol_Process(void)
         case VISION_STATE_IDLE:
             break;
         case VISION_STATE_GO:
-            Chassis_GoStraight(500);
+            Chassis_GoStraight(100);
+            _INFO("GO");
             break;
         case VISION_STATE_STOP:
             Chassis_Stop();
+            _INFO("STOP");
             visionState = VISION_STATE_IDLE;
             break;
         case VISION_STATE_LEFT:
             Chassis_Turn(90, 90);
+            _INFO("LEFT");
             visionState = VISION_STATE_IDLE;
             break;
         case VISION_STATE_RIGHT:
             Chassis_Turn(-90, 90);
+            _INFO("RIGHT");
             visionState = VISION_STATE_IDLE;
             break;
     }
@@ -47,60 +55,54 @@ void VisionProtocol_Process(void)
 
 static void VisionProtocol_RX_Callback(void)
 {
-    char res[32] = {0};
-    uint8_t index = 0;
-    uint8_t receiving = 0;
-    while(USART_GetFlagStatus(USART2, USART_FLAG_RXNE) == SET){
-        char ch = USART_ReceiveData(USART2);
-        if(ch == '$'){
-            receiving = 1;
-            index = 0;
+    char ch = (char)USART_ReceiveData(USART2);
+
+    if(ch == '$'){
+        receiving = 1;
+        index = 0;
+        res[index++] = ch;
+    }
+    else if(receiving){
+        if(index < sizeof(res) - 1){
             res[index++] = ch;
-            continue;
-        }
-        else if(receiving){
-            if(index < sizeof(res) - 1){
-                res[index++] = ch;
-                if(ch == '#'){
-                    res[index] = '\0';
-                    receiving = 0;
-                    // 处理命令
-                    VisionProtocol_Parse(res);
-                    index = 0;
-                }
-            }
-            else{
-                index = 0;
+            if(ch == '#'){
+                res[index] = '\0';
                 receiving = 0;
-                _WARN("VisionProtocol_RX_Callback: Command too long");
+                // 处理命令
+                VisionProtocol_Parse(res);
+                index = 0;
             }
         }
         else{
-            // 忽略多余数据
             index = 0;
             receiving = 0;
-            _WARN("VisionProtocol_RX_Callback: Ignoring extra data: '%c'", ch);
+            _WARN("VisionProtocol_RX_Callback: Command too long");
         }
+    }
+    else{
+        // 忽略多余数据
+        index = 0;
+        receiving = 0;
+        _WARN("VisionProtocol_RX_Callback: Ignoring extra data: '%c'", ch);
     }
 }
 
 static void VisionProtocol_Parse(const char* cmd)
 {
-
     if(!cmd){
         _WARN("VisionProtocol_Parse: cmd is NULL");
         return;
     }
-    if(strcmp(cmd, "$TRACK:GO") == 0){
+    if(strcmp(cmd, "$TRACK:GO#") == 0){
         visionState = VISION_STATE_GO;
     }
-    else if(strcmp(cmd, "$TRACK:STOP") == 0){
+    else if(strcmp(cmd, "$TRACK:STOP#") == 0){
         visionState = VISION_STATE_STOP;
     }
-    else if(strcmp(cmd, "$TRACK:LEFT") == 0){
+    else if(strcmp(cmd, "$TRACK:LEFT#") == 0){
         visionState = VISION_STATE_LEFT;
     }
-    else if(strcmp(cmd, "$TRACK:RIGHT") == 0){
+    else if(strcmp(cmd, "$TRACK:RIGHT#") == 0){
         visionState = VISION_STATE_RIGHT;
     }
     else{

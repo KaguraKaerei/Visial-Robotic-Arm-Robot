@@ -24,7 +24,7 @@ static USART_Callback_t UART1_Callback = 0;
 static USART_Callback_t UART2_Callback = 0;
 static USART_Callback_t UART3_Callback = 0;
 /**
-  * @brief 串口硬件初始化 
+  * @brief 串口硬件初始化
   * @param USART 串口选择
   * @param mode 串口模式
   */
@@ -32,7 +32,7 @@ void iUSART_Init(iUSART_t USART, USART_Mode_t mode)
 {
     // 串口及模式选择
     const USART_Config_t* config = 0;
-    for(uint8_t i = 0; i < sizeof(USART_Config)/sizeof(USART_Config[0]); ++i){
+    for(uint8_t i = 0; i < sizeof(USART_Config) / sizeof(USART_Config[0]); ++i){
         if(USART_Config[i].USART == USART && USART_Config[i].Mode == mode){
             config = &USART_Config[i];
             break;
@@ -131,11 +131,10 @@ void iUSART_Init(iUSART_t USART, USART_Mode_t mode)
   */
 void USART_RegisterCallback(iUSART_t USART, USART_Callback_t callback)
 {
-    switch(USART)
-    {
+    switch(USART){
         case iUSART1:
         {
-        	UART1_Callback = callback;
+            UART1_Callback = callback;
             break;
         }
         case iUSART2:
@@ -174,8 +173,7 @@ void USART_Printf(USART_TypeDef* USARTx, const char* format, ...)
  */
 static void USART_SendString(USART_TypeDef* USARTx, const char* str)
 {
-    while(*str)
-    {
+    while(*str){
         USART_SendData(USARTx, (uint8_t)*str++);
         while(USART_GetFlagStatus(USARTx, USART_FLAG_TXE) == RESET);
     }
@@ -185,61 +183,57 @@ static void USART_SendString(USART_TypeDef* USARTx, const char* str)
   */
 void USART1_IRQHandler(void)
 {
-	if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)
-	{
-		USART_ClearITPendingBit(USART1, USART_IT_RXNE);
-		// 调用驱动层注册的回调函数
-		if(UART1_Callback != 0){
-			UART1_Callback();
-		}
-	}
+    if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET){
+        // 调用驱动层注册的回调函数
+        if(UART1_Callback != 0){
+            UART1_Callback();
+        }
+        USART_ClearITPendingBit(USART1, USART_IT_RXNE);
+    }
 }
 void USART2_IRQHandler(void)
 {
-    if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)
-    {
-        USART_ClearITPendingBit(USART2, USART_IT_RXNE);
+    if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET){
         // 调用驱动层注册的回调函数
         if(UART2_Callback != 0){
             UART2_Callback();
         }
+        USART_ClearITPendingBit(USART2, USART_IT_RXNE);
     }
 }
 void USART3_IRQHandler(void)
 {
-    if(USART_GetITStatus(USART3, USART_IT_RXNE) != RESET)
-    {
-        USART_ClearITPendingBit(USART3, USART_IT_RXNE);
+    if(USART_GetITStatus(USART3, USART_IT_RXNE) != RESET){
         // 调用驱动层注册的回调函数
         if(UART3_Callback != 0){
             UART3_Callback();
         }
+        USART_ClearITPendingBit(USART3, USART_IT_RXNE);
     }
 }
 
 #pragma import(__use_no_semihosting)             
 
-struct __FILE 
-{ 
-	int handle; 
-}; 
+struct __FILE{
+    int handle;
+};
 
-FILE __stdout;       
+FILE __stdout;
 
-void _sys_exit(int x) 
-{ 
-	x = x; 
-}
-
-int fputc(int ch, FILE *f)
-{    
-	while((USART1->SR&0X40)==0){};
-		USART1->DR = (u8) ch;
-	return ch;
-}
-
-int fgetc(FILE *f)
+void _sys_exit(int x)
 {
-	while((USART1->SR&0X20)==0){};
-	return (int)(USART1->DR);
+    x = x;
+}
+
+int fputc(int ch, FILE* f)
+{
+    while((USART1->SR & 0X40) == 0){ };
+    USART1->DR = (u8)ch;
+    return ch;
+}
+
+int fgetc(FILE* f)
+{
+    while((USART1->SR & 0X20) == 0){ };
+    return (int)(USART1->DR);
 }

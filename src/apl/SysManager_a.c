@@ -37,18 +37,17 @@ void SysManager_Process(void)
 {
     if(!sysReady) return;
 
-    switch(sysState)
-    {
+    switch(sysState){
         case SYS_STATE_RUNNING:
             // 系统正常运行
 
             break;
-            
+
         case SYS_STATE_ERROR:
             _ERROR("System in error state!");
             LED_On();
             break;
-            
+
         default:
             break;
     }

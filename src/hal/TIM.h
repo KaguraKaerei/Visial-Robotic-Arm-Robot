@@ -15,7 +15,7 @@ typedef enum{
     TIM_MODE_IC,
     TIM_MODE_ENCODER
 } TIM_Mode_t;
-typedef void(* TIM_Callback_t)(void);
+typedef void(*TIM_Callback_t)(void);
 
 void iTIM_Init(iTIM_t TIM, TIM_Mode_t mode);
 void TIM_RegisterCallback(iTIM_t TIM, TIM_Callback_t callback);

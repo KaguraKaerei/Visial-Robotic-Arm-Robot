@@ -96,10 +96,9 @@ static void BlueTooth_Parse(const char* cmd)
         Chassis_Stop();
     }
     else if(sscanf(cmd, "$MODE:DATAINFO:%d#", &dataInfoFlag) == 1 ||
-            sscanf(cmd, "$MODE:DATAINFO:%d:%d#", &dataInfoFlag, &speed) == 2 ||
-            sscanf(cmd, "$MODE:DATAINFO:%d:%d,%d#", &dataInfoFlag, &angle, &angularVel) == 3){
-        switch(dataInfoFlag)
-        {
+        sscanf(cmd, "$MODE:DATAINFO:%d:%d#", &dataInfoFlag, &speed) == 2 ||
+        sscanf(cmd, "$MODE:DATAINFO:%d:%d,%d#", &dataInfoFlag, &angle, &angularVel) == 3){
+        switch(dataInfoFlag){
             case 0: break;
             case 1:
                 Chassis_GoStraight(speed);
@@ -112,15 +111,15 @@ static void BlueTooth_Parse(const char* cmd)
                 break;
         }
         Chassis_GetData(&chassisParam);
-        _INFO(  "Chassis: [LF, RF, LR, RR][10ms, speed]: "
-                "%d, %d, %d, %d, "
-                "%d, %d, %d, %d  ",
-              chassisParam.encorder10ms[0], chassisParam.encorderSpeed[0],
-              chassisParam.encorder10ms[1], chassisParam.encorderSpeed[1], 
-              chassisParam.encorder10ms[2], chassisParam.encorderSpeed[2],
-              chassisParam.encorder10ms[3], chassisParam.encorderSpeed[3]);
+        _INFO("Chassis: [LF, RF, LR, RR][10ms, speed]: "
+            "%d, %d, %d, %d, "
+            "%d, %d, %d, %d  ",
+            chassisParam.encorder10ms[0], chassisParam.encorderSpeed[0],
+            chassisParam.encorder10ms[1], chassisParam.encorderSpeed[1],
+            chassisParam.encorder10ms[2], chassisParam.encorderSpeed[2],
+            chassisParam.encorder10ms[3], chassisParam.encorderSpeed[3]);
     }
-	else if(sscanf(cmd, "$PID:%f,%f,%f", &p, &i, &d) == 3){
+    else if(sscanf(cmd, "$PID:%f,%f,%f", &p, &i, &d) == 3){
         jy61pYawPID.p = p;
         jy61pYawPID.i = i;
         jy61pYawPID.d = d;
@@ -162,8 +161,7 @@ static uint8_t RingBuffer_GetStatus(const RingBuffer_t* const rb)
 
 static uint8_t RingBuffer_Write(RingBuffer_t* const rb, const uint8_t* data, uint16_t length, RingBuffer_Mode_t mode)
 {
-    switch(mode)
-    {
+    switch(mode){
         case BLOCKWRITE:
         {
             for(uint16_t i = 0; i < length; ++i){
@@ -203,8 +201,7 @@ static uint8_t RingBuffer_Write(RingBuffer_t* const rb, const uint8_t* data, uin
 
 static int RingBuffer_Read(RingBuffer_t* const rb, uint8_t* data, uint16_t length, RingBuffer_Mode_t mode)
 {
-    switch(mode)
-    {
+    switch(mode){
         case BLOCKREAD:
         {
             for(uint16_t i = 0; i < length; ++i){

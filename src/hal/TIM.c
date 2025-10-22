@@ -14,14 +14,14 @@ typedef struct{
 } TIM_Config_t;
 static const TIM_Config_t TIM_Config[] = {
     // TIM2
-    {iTIM2, TIM_MODE_BASIC, 0x0000, RCC_APB1Periph_TIM2, TIM2, TIM2_IRQn, 10000-1, 7200-1, 0},
-    {iTIM2, TIM_MODE_PWM, 0x1000, RCC_APB1Periph_TIM2, TIM2, TIM2_IRQn, 1000-1, 72-1, 0},
+    {iTIM2, TIM_MODE_BASIC, 0x0000, RCC_APB1Periph_TIM2, TIM2, TIM2_IRQn, 10000 - 1, 7200 - 1, 0},
+    {iTIM2, TIM_MODE_PWM, 0x1000, RCC_APB1Periph_TIM2, TIM2, TIM2_IRQn, 1000 - 1, 72 - 1, 0},
     // TIM3
-    {iTIM3, TIM_MODE_BASIC, 0x0000, RCC_APB1Periph_TIM3, TIM3, TIM3_IRQn, 10000-1, 7200-1, 0},
-    {iTIM3, TIM_MODE_PWM, 0x1111, RCC_APB1Periph_TIM3, TIM3, TIM3_IRQn, 1000-1, 72-1, 0},
+    {iTIM3, TIM_MODE_BASIC, 0x0000, RCC_APB1Periph_TIM3, TIM3, TIM3_IRQn, 10000 - 1, 7200 - 1, 0},
+    {iTIM3, TIM_MODE_PWM, 0x1111, RCC_APB1Periph_TIM3, TIM3, TIM3_IRQn, 1000 - 1, 72 - 1, 0},
     // TIM4
-    {iTIM4, TIM_MODE_BASIC, 0x0000, RCC_APB1Periph_TIM4, TIM4, TIM4_IRQn, 10000-1, 7200-1, 0},
-    {iTIM4, TIM_MODE_PWM, 0x1111, RCC_APB1Periph_TIM4, TIM4, TIM4_IRQn, 1000-1, 72-1, 0},
+    {iTIM4, TIM_MODE_BASIC, 0x0000, RCC_APB1Periph_TIM4, TIM4, TIM4_IRQn, 10000 - 1, 7200 - 1, 0},
+    {iTIM4, TIM_MODE_PWM, 0x1111, RCC_APB1Periph_TIM4, TIM4, TIM4_IRQn, 1000 - 1, 72 - 1, 0},
 };
 /* TIM中断回调函数 */
 static TIM_Callback_t TIM1_Callback = 0;
@@ -37,7 +37,7 @@ void iTIM_Init(iTIM_t TIMx, TIM_Mode_t mode)
 {
     // 定时器及模式选择
     const TIM_Config_t* config = 0;
-    for(uint8_t i = 0; i < sizeof(TIM_Config)/sizeof(TIM_Config[0]); ++i){
+    for(uint8_t i = 0; i < sizeof(TIM_Config) / sizeof(TIM_Config[0]); ++i){
         if(TIM_Config[i].TIM == TIMx && TIM_Config[i].Mode == mode){
             config = &TIM_Config[i];
             break;
@@ -130,8 +130,7 @@ void iTIM_Init(iTIM_t TIMx, TIM_Mode_t mode)
  */
 void TIM_RegisterCallback(iTIM_t TIM, TIM_Callback_t callback)
 {
-    switch(TIM)
-    {
+    switch(TIM){
         case iTIM1:
             TIM1_Callback = callback;
             break;
@@ -151,8 +150,7 @@ void TIM_RegisterCallback(iTIM_t TIM, TIM_Callback_t callback)
  */
 void TIM1_IRQHandler(void)
 {
-    if(TIM_GetFlagStatus(TIM1, TIM_FLAG_Update) == SET)
-    {
+    if(TIM_GetFlagStatus(TIM1, TIM_FLAG_Update) == SET){
         TIM_ClearITPendingBit(TIM1, TIM_IT_Update);
         // 调用注册的回调函数
         if(TIM1_Callback != 0){
@@ -162,8 +160,7 @@ void TIM1_IRQHandler(void)
 }
 void TIM2_IRQHandler(void)
 {
-    if(TIM_GetFlagStatus(TIM2, TIM_FLAG_Update) == SET)
-    {
+    if(TIM_GetFlagStatus(TIM2, TIM_FLAG_Update) == SET){
         TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
         // 调用注册的回调函数
         if(TIM2_Callback != 0){
@@ -173,8 +170,7 @@ void TIM2_IRQHandler(void)
 }
 void TIM3_IRQHandler(void)
 {
-    if(TIM_GetFlagStatus(TIM3, TIM_FLAG_Update) == SET)
-    {
+    if(TIM_GetFlagStatus(TIM3, TIM_FLAG_Update) == SET){
         TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
         // 调用注册的回调函数
         if(TIM3_Callback != 0){
@@ -184,8 +180,7 @@ void TIM3_IRQHandler(void)
 }
 void TIM4_IRQHandler(void)
 {
-    if(TIM_GetFlagStatus(TIM4, TIM_FLAG_Update) == SET)
-    {
+    if(TIM_GetFlagStatus(TIM4, TIM_FLAG_Update) == SET){
         TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
         // 调用注册的回调函数
         if(TIM4_Callback != 0){

@@ -37,7 +37,7 @@ void Chassis_Init(void)
     USART_Printf(USART3, "$mline:11#");         // 分辨率
     USART_Printf(USART3, "$mphase:56#");        // 减速比
     USART_Printf(USART3, "$wdiameter:85#");     // 轮子直径
-    
+
     PID_Init(&jy61pYawPID);
     PID_SetPID(&jy61pYawPID, 2.0f, 0.01f, 0.5f);
 }
@@ -52,9 +52,9 @@ void Chassis_SetSpeed(const ChassisParam_t* const param)
         return;
     }
     USART_Printf(USART3, "$spd:%d,%d,%d,%d#", param->speed[CHASSIS_WHEEL_LF],
-                                                param->speed[CHASSIS_WHEEL_RF],
-                                                param->speed[CHASSIS_WHEEL_LR],
-                                                param->speed[CHASSIS_WHEEL_RR]);
+        -param->speed[CHASSIS_WHEEL_RF],
+        -param->speed[CHASSIS_WHEEL_LR],
+        param->speed[CHASSIS_WHEEL_RR]);
 }
 /**
  * @brief 设置底盘PWM
@@ -67,9 +67,9 @@ void Chassis_SetPWM(const ChassisParam_t* const param)
         return;
     }
     USART_Printf(USART3, "$pwm:%u,%u,%u,%u#", param->pwm[CHASSIS_WHEEL_LF],
-                                        param->pwm[CHASSIS_WHEEL_RF],
-                                        param->pwm[CHASSIS_WHEEL_LR],
-                                        param->pwm[CHASSIS_WHEEL_RR]);
+        -param->pwm[CHASSIS_WHEEL_RF],
+        -param->pwm[CHASSIS_WHEEL_LR],
+        param->pwm[CHASSIS_WHEEL_RR]);
 }
 /**
  * @brief 设置底盘PID
@@ -99,7 +99,7 @@ void Chassis_GetData(ChassisParam_t* const param)
     }
     // 发送指令并接受数据
     USART_Printf(USART3, "$upload:1,1,1#");
-    char res[3][32] = {0};
+    char res[3][32] = { 0 };
     uint8_t index = 0;
     uint8_t line = 0;
     uint32_t timeout = 1000;
@@ -127,18 +127,18 @@ void Chassis_GetData(ChassisParam_t* const param)
         return;
     }
     // 解析接收的数据
-    sscanf(res[0], "$MALL:%d,%d,%d,%d#", &param->encorderAll[CHASSIS_WHEEL_LF], 
-                                        &param->encorderAll[CHASSIS_WHEEL_RF], 
-                                        &param->encorderAll[CHASSIS_WHEEL_LR], 
-                                        &param->encorderAll[CHASSIS_WHEEL_RR]);
-    sscanf(res[1], "$MTEP:%d,%d,%d,%d#", &param->encorder10ms[CHASSIS_WHEEL_LF], 
-                                        &param->encorder10ms[CHASSIS_WHEEL_RF], 
-                                        &param->encorder10ms[CHASSIS_WHEEL_LR], 
-                                        &param->encorder10ms[CHASSIS_WHEEL_RR]);
-    sscanf(res[2], "$MSPD:%d,%d,%d,%d#", &param->encorderSpeed[CHASSIS_WHEEL_LF], 
-                                        &param->encorderSpeed[CHASSIS_WHEEL_RF], 
-                                        &param->encorderSpeed[CHASSIS_WHEEL_LR], 
-                                        &param->encorderSpeed[CHASSIS_WHEEL_RR]);
+    sscanf(res[0], "$MALL:%d,%d,%d,%d#", &param->encorderAll[CHASSIS_WHEEL_LF],
+        &param->encorderAll[CHASSIS_WHEEL_RF],
+        &param->encorderAll[CHASSIS_WHEEL_LR],
+        &param->encorderAll[CHASSIS_WHEEL_RR]);
+    sscanf(res[1], "$MTEP:%d,%d,%d,%d#", &param->encorder10ms[CHASSIS_WHEEL_LF],
+        &param->encorder10ms[CHASSIS_WHEEL_RF],
+        &param->encorder10ms[CHASSIS_WHEEL_LR],
+        &param->encorder10ms[CHASSIS_WHEEL_RR]);
+    sscanf(res[2], "$MSPD:%d,%d,%d,%d#", &param->encorderSpeed[CHASSIS_WHEEL_LF],
+        &param->encorderSpeed[CHASSIS_WHEEL_RF],
+        &param->encorderSpeed[CHASSIS_WHEEL_LR],
+        &param->encorderSpeed[CHASSIS_WHEEL_RR]);
     // USART_Printf(USART3, "$upload:0,1,0#");
     // char res[32] = {0};
     // uint8_t index = 0;
@@ -181,7 +181,7 @@ void Chassis_Move(int linearVel, int angularVel)
     // 角度转弧度
     float angularVelRad = angularVel * PI / 180.0f;
     // 逆运动学解算
-    chassisParam.linearVel = linearVel;
+    chassisParam.linearVel = linearVel / 10;
     chassisParam.angularVel = angularVelRad;
     Chassis_DifferentialIK(&chassisParam);
     // 设置速度
@@ -278,7 +278,7 @@ void Chassis_SelfCtrl_Move(int linearVel, int angularVel)
     // 角度转弧度
     float angularVelRad = angularVel * PI / 180.0f;
     // 逆运动学解算
-    chassisParam.linearVel = linearVel;
+    chassisParam.linearVel = linearVel / 10;
     chassisParam.angularVel = angularVelRad;
     Chassis_DifferentialIK(&chassisParam);
     // 自解算闭环控制速度
@@ -380,8 +380,8 @@ static void Chassis_DifferentialIK(ChassisParam_t* const param)
     leftVel = leftVel > CHASSIS_MAX_SPEED ? CHASSIS_MAX_SPEED : (leftVel < -CHASSIS_MAX_SPEED ? -CHASSIS_MAX_SPEED : leftVel);
     rightVel = rightVel > CHASSIS_MAX_SPEED ? CHASSIS_MAX_SPEED : (rightVel < -CHASSIS_MAX_SPEED ? -CHASSIS_MAX_SPEED : rightVel);
     // TODO： cm/s 转换为 车板单位+补偿系数
-    leftVel *= 27;
-    rightVel *= 27;
+    leftVel *= 30;
+    rightVel *= 30;
     // 写入数据(cm/s -> 车板单位+补偿系数)
     param->speed[CHASSIS_WHEEL_LF] = (int)leftVel;
     param->speed[CHASSIS_WHEEL_RF] = (int)rightVel;
