@@ -1,5 +1,7 @@
 #include "TIM.h"
 
+#define None -1
+
 /* 定时器初始化配置表 */
 typedef struct{
     iTIM_t TIM;
@@ -12,16 +14,19 @@ typedef struct{
     uint16_t TIM_Prescaler;
     uint16_t TIM_Pulse;
 } TIM_Config_t;
+
+// 五个舵机PWM：TIM2: PA0(CH1)、PA1(CH2) ; TIM3: PA7(CH2)、PB0(CH3)、PB1(CH4)   20ms周期，0.5ms-2.5ms脉宽
+// 定时器，模式，通道，时钟，定时器，中断号，周期，预分频，占空比
 static const TIM_Config_t TIM_Config[] = {
     // TIM2
     {iTIM2, TIM_MODE_BASIC, 0x0000, RCC_APB1Periph_TIM2, TIM2, TIM2_IRQn, 10000 - 1, 7200 - 1, 0},
-    {iTIM2, TIM_MODE_PWM, 0x1000, RCC_APB1Periph_TIM2, TIM2, TIM2_IRQn, 1000 - 1, 72 - 1, 0},
+    {iTIM2, TIM_MODE_PWM, 0x1100, RCC_APB1Periph_TIM2, TIM2, None, 20 * 1000 - 1, 72 - 1, 0},
     // TIM3
     {iTIM3, TIM_MODE_BASIC, 0x0000, RCC_APB1Periph_TIM3, TIM3, TIM3_IRQn, 10000 - 1, 7200 - 1, 0},
-    {iTIM3, TIM_MODE_PWM, 0x1111, RCC_APB1Periph_TIM3, TIM3, TIM3_IRQn, 1000 - 1, 72 - 1, 0},
+    {iTIM3, TIM_MODE_PWM, 0x0111, RCC_APB1Periph_TIM3, TIM3, None, 20 * 1000 - 1, 72 - 1, 0},
     // TIM4
     {iTIM4, TIM_MODE_BASIC, 0x0000, RCC_APB1Periph_TIM4, TIM4, TIM4_IRQn, 10000 - 1, 7200 - 1, 0},
-    {iTIM4, TIM_MODE_PWM, 0x1111, RCC_APB1Periph_TIM4, TIM4, TIM4_IRQn, 1000 - 1, 72 - 1, 0},
+    {iTIM4, TIM_MODE_PWM, 0x1111, RCC_APB1Periph_TIM4, TIM4, None, 1000 - 1, 72 - 1, 0},
 };
 /* TIM中断回调函数 */
 static TIM_Callback_t TIM1_Callback = 0;
@@ -112,7 +117,7 @@ void iTIM_Init(iTIM_t TIMx, TIM_Mode_t mode)
 
     }
     // NVIC配置
-    if(config->Mode != TIM_MODE_PWM){
+    if(config->IRQn != None){
         TIM_ClearFlag(config->TIMx, TIM_IT_Update);
         TIM_ITConfig(config->TIMx, TIM_IT_Update, ENABLE);
         NVIC_InitTypeDef NVIC_InitStructure;

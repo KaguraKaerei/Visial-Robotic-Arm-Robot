@@ -28,8 +28,6 @@ static void Chassis_SelfCtrl(ChassisParam_t* const param);
  */
 void Chassis_Init(void)
 {
-    // 初始化串口
-    iUSART_Init(iUSART3, USART_MODE_BASIC);
     // 配置底盘
     USART_Printf(USART3, "$flash_reset#");      // 重置参数
     USART_Printf(USART3, "$mtype:1#");          // 520电机

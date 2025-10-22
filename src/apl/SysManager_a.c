@@ -73,9 +73,13 @@ static void SysManager_InitHardware(void)
     DWT_Init();
 
     // 串口通信
-    iUSART_Init(iUSART1, USART_MODE_BASIC);  // 蓝牙
-    iUSART_Init(iUSART2, USART_MODE_BASIC);  // 云台
-    iUSART_Init(iUSART3, USART_MODE_BASIC);  // 底盘
+    iUSART_Init(iUSART1, USART_MODE_BASIC);     // 蓝牙
+    iUSART_Init(iUSART2, USART_MODE_BASIC);     // 云台
+    iUSART_Init(iUSART3, USART_MODE_BASIC);     // 底盘
+
+    // 定时器初始化
+    iTIM_Init(iTIM2, TIM_MODE_PWM);             // PA0/PA1 —— 舵机1/舵机2
+    iTIM_Init(iTIM3, TIM_MODE_PWM);             // PA7/PB0/PB1 —— 舵机3/舵机4/舵机5
 }
 
 /**
@@ -83,8 +87,6 @@ static void SysManager_InitHardware(void)
  */
 static void SysManager_InitModules(void)
 {
-    // I2C（陀螺仪）
-    JY61p_I2C_Init();
     // 底盘
     Chassis_Init();
     Chassis_SelfCtrl_Init();
