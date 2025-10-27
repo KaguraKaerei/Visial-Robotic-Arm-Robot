@@ -15,12 +15,14 @@ int main()
         SysManager_Process();               // 系统管理
         if(System_Is_Ready()){
             BlueTooth_Process();            // 蓝牙通信
-            VisionProtocol_Process();       // 视觉通信
+            VisionProtocol_Process();       // 视觉通信+++
+            Servo_SetCCR(SERVO_JOINT_1, 1000);
         }
 
         // 时间片轮转部分
         if(sysTick_DelayMs(&infoDelayer, 1000)){
             // Chassis_GetData(&chassisParam);
+
         }
         if(DWT_DelayUs(&yawDelayer, 100)){
 

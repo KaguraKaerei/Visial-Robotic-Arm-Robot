@@ -1,6 +1,6 @@
 #include "TIM.h"
 
-#define None -1
+#define NO_IRQN ((IRQn_Type)(-1))
 
 /* 定时器初始化配置表 */
 typedef struct{
@@ -20,13 +20,13 @@ typedef struct{
 static const TIM_Config_t TIM_Config[] = {
     // TIM2
     {iTIM2, TIM_MODE_BASIC, 0x0000, RCC_APB1Periph_TIM2, TIM2, TIM2_IRQn, 10000 - 1, 7200 - 1, 0},
-    {iTIM2, TIM_MODE_PWM, 0x1100, RCC_APB1Periph_TIM2, TIM2, None, 20 * 1000 - 1, 72 - 1, 0},
+    {iTIM2, TIM_MODE_PWM, 0x1100, RCC_APB1Periph_TIM2, TIM2, NO_IRQN, 20 * 1000 - 1, 72 - 1, 0},
     // TIM3
     {iTIM3, TIM_MODE_BASIC, 0x0000, RCC_APB1Periph_TIM3, TIM3, TIM3_IRQn, 10000 - 1, 7200 - 1, 0},
-    {iTIM3, TIM_MODE_PWM, 0x0111, RCC_APB1Periph_TIM3, TIM3, None, 20 * 1000 - 1, 72 - 1, 0},
+    {iTIM3, TIM_MODE_PWM, 0x0111, RCC_APB1Periph_TIM3, TIM3, NO_IRQN, 20 * 1000 - 1, 72 - 1, 0},
     // TIM4
     {iTIM4, TIM_MODE_BASIC, 0x0000, RCC_APB1Periph_TIM4, TIM4, TIM4_IRQn, 10000 - 1, 7200 - 1, 0},
-    {iTIM4, TIM_MODE_PWM, 0x1111, RCC_APB1Periph_TIM4, TIM4, None, 1000 - 1, 72 - 1, 0},
+    {iTIM4, TIM_MODE_PWM, 0x1111, RCC_APB1Periph_TIM4, TIM4, NO_IRQN, 1000 - 1, 72 - 1, 0},
 };
 /* TIM中断回调函数 */
 static TIM_Callback_t TIM1_Callback = 0;
@@ -54,12 +54,14 @@ void iTIM_Init(iTIM_t TIMx, TIM_Mode_t mode)
     if(config->Mode == TIM_MODE_PWM){
         GPIO_InitTypeDef GPIO_InitStructure;
         if(config->TIMx == TIM2){
+            RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
             GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3;
             GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
             GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
             GPIO_Init(GPIOA, &GPIO_InitStructure);
         }
-        else if(TIM_Config->TIMx == TIM3){
+        else if(config->TIMx == TIM3){
+            RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB, ENABLE);
             GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
             GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
             GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -67,7 +69,8 @@ void iTIM_Init(iTIM_t TIMx, TIM_Mode_t mode)
             GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;
             GPIO_Init(GPIOB, &GPIO_InitStructure);
         }
-        else if(TIM_Config->TIMx == TIM4){
+        else if(config->TIMx == TIM4){
+            RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
             GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9;
             GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
             GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -117,7 +120,7 @@ void iTIM_Init(iTIM_t TIMx, TIM_Mode_t mode)
 
     }
     // NVIC配置
-    if(config->IRQn != None){
+    if(config->IRQn != NO_IRQN){
         TIM_ClearFlag(config->TIMx, TIM_IT_Update);
         TIM_ITConfig(config->TIMx, TIM_IT_Update, ENABLE);
         NVIC_InitTypeDef NVIC_InitStructure;

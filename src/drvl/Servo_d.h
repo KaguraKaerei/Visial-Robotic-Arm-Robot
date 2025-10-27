@@ -13,7 +13,7 @@ typedef enum{
 } Servo_ID_t;
 
 void Servo_Init(void);
-bool Servo_SetAngle(Servo_ID_t servo_id, float angle);
-float Servo_GetAngle(Servo_ID_t servo_id);
+bool Servo_SetCCR(Servo_ID_t servo_id, uint16_t ccr);
+uint16_t Servo_GetCCR(Servo_ID_t servo_id);
 
 #endif

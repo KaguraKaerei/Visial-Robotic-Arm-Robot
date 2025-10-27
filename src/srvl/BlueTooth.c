@@ -4,6 +4,7 @@
 #include "UART.h"
 #include "LED_d.h"
 #include "Chassis_d.h"
+#include "Servo_d.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -81,6 +82,7 @@ static void BlueTooth_Parse(const char* cmd)
     float p, i, d;
     int speed, angle, angularVel;
     int dataInfoFlag = 0;
+    uint16_t servoCCR;
 
     if(!cmd){
         _WARN("BlueTooth_Parse: cmd is NULL");
@@ -123,6 +125,9 @@ static void BlueTooth_Parse(const char* cmd)
         jy61pYawPID.p = p;
         jy61pYawPID.i = i;
         jy61pYawPID.d = d;
+    }
+    else if(sscanf(cmd, "$SERVO:CCR:%u#", &servoCCR) == 1){
+        Servo_SetCCR(SERVO_CHASSIS, servoCCR);
     }
     else{
         _WARN("BlueTooth_Parse: Unknown command '%s'", cmd);

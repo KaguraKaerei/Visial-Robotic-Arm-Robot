@@ -96,4 +96,6 @@ static void SysManager_InitModules(void)
     JY61p_Init();
     // 视觉
     VisionProtocol_Init();
+    // 舵机
+    Servo_Init();
 }

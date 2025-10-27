@@ -14,12 +14,14 @@
 #include "LED_d.h"
 #include "JY61p_d.h"
 #include "Chassis_d.h"
+#include "Servo_d.h"
 // Service Layer
 #include "LOG_s.h"
 #include "Delay_s.h"
 #include "Chassis_d.h"
 #include "BlueTooth.h"
 #include "VisionProtocol.h"
+#include "s_Kinematics.h"
 // Application Layer
 
 
