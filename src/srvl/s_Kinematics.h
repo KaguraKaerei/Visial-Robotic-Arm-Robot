@@ -20,9 +20,10 @@ typedef struct{
 /* ========================= 接 口 函 数 声 明 ========================= */
 
 void Arm_Kinematics_Init(void);
-bool Arm_AimAtTarget(Coord_2D_t target);
+bool Arm_AimAtTarget(Coord_2D_t target, bool use_laser);
 bool Arm_TF_TargetToBase(float depth, Coord_3D_t* target_base);
-bool Arm_InverseKinematics(float depth, float angle);
+bool Arm_InverseKinematicsWithAim(float depth, float angle);
+bool Arm_InverseKinematics(float x, float y, float z, float angle);
 bool Arm_SetGripperAngle(float angle);
 
 #endif

@@ -23,7 +23,7 @@
 #include "VisionProtocol.h"
 #include "s_Kinematics.h"
 // Application Layer
-
+#include "a_Arm.h"
 
 // 系统状态定义
 typedef enum{

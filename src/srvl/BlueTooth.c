@@ -7,8 +7,10 @@
 #include "Servo_d.h"
 #include <stdio.h>
 #include <string.h>
+#include "a_Arm.h"
 
 /* ========================= 私 有 变 量 声 明 ========================= */
+
 static RingBuffer_t btRingBuffer;
 static uint8_t btBuffer[256];
 static char cmdBuffer[64];
@@ -126,8 +128,14 @@ static void BlueTooth_Parse(const char* cmd)
         jy61pYawPID.i = i;
         jy61pYawPID.d = d;
     }
-    else if(sscanf(cmd, "$SERVO:CCR:%u#", &servoCCR) == 1){
+    else if(sscanf(cmd, "$SERVO:CCR:%hu#", &servoCCR) == 1){
         Servo_SetCCR(SERVO_CHASSIS, servoCCR);
+    }
+    else if(sscanf(cmd, "$ARM:ANY:%f,%f,%f,%f#", &arm_param.x, &arm_param.y, &arm_param.z, &arm_param.angle) == 4){
+        arm_state = ARM_STATE_ANY;
+    }
+    else if(strcmp(cmd, "$ARM:END#") == 0){
+        arm_state = ARM_STATE_END;
     }
     else{
         _WARN("BlueTooth_Parse: Unknown command '%s'", cmd);

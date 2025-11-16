@@ -51,32 +51,60 @@ void iTIM_Init(iTIM_t TIMx, TIM_Mode_t mode)
     if(!config) return;
     // 基本初始化配置
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+    
     if(config->Mode == TIM_MODE_PWM){
         GPIO_InitTypeDef GPIO_InitStructure;
+        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+        GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+        
         if(config->TIMx == TIM2){
             RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3;
-            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-            GPIO_Init(GPIOA, &GPIO_InitStructure);
+            // 根据 TIM_Channel 位掩码配置对应引脚
+            // TIM2: CH1=PA0, CH2=PA1, CH3=PA2, CH4=PA3
+            uint16_t pins = 0;
+            if(config->TIM_Channel & 0x1000) pins |= GPIO_Pin_0; // CH1
+            if(config->TIM_Channel & 0x0100) pins |= GPIO_Pin_1; // CH2
+            if(config->TIM_Channel & 0x0010) pins |= GPIO_Pin_2; // CH3
+            if(config->TIM_Channel & 0x0001) pins |= GPIO_Pin_3; // CH4
+            if(pins){
+                GPIO_InitStructure.GPIO_Pin = pins;
+                GPIO_Init(GPIOA, &GPIO_InitStructure);
+            }
         }
         else if(config->TIMx == TIM3){
-            RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB, ENABLE);
-            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
-            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-            GPIO_Init(GPIOA, &GPIO_InitStructure);
-            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;
-            GPIO_Init(GPIOB, &GPIO_InitStructure);
+            // TIM3: CH1=PA6, CH2=PA7, CH3=PB0, CH4=PB1
+            uint16_t pins_a = 0, pins_b = 0;
+            if(config->TIM_Channel & 0x1000) pins_a |= GPIO_Pin_6; // CH1
+            if(config->TIM_Channel & 0x0100) pins_a |= GPIO_Pin_7; // CH2
+            if(config->TIM_Channel & 0x0010) pins_b |= GPIO_Pin_0; // CH3
+            if(config->TIM_Channel & 0x0001) pins_b |= GPIO_Pin_1; // CH4
+            
+            if(pins_a){
+                RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+                GPIO_InitStructure.GPIO_Pin = pins_a;
+                GPIO_Init(GPIOA, &GPIO_InitStructure);
+            }
+            if(pins_b){
+                RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+                GPIO_InitStructure.GPIO_Pin = pins_b;
+                GPIO_Init(GPIOB, &GPIO_InitStructure);
+            }
         }
         else if(config->TIMx == TIM4){
             RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
-            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9;
-            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-            GPIO_Init(GPIOB, &GPIO_InitStructure);
+            // TIM4: CH1=PB6, CH2=PB7, CH3=PB8, CH4=PB9
+            uint16_t pins = 0;
+            if(config->TIM_Channel & 0x1000) pins |= GPIO_Pin_6; // CH1
+            if(config->TIM_Channel & 0x0100) pins |= GPIO_Pin_7; // CH2
+            if(config->TIM_Channel & 0x0010) pins |= GPIO_Pin_8; // CH3
+            if(config->TIM_Channel & 0x0001) pins |= GPIO_Pin_9; // CH4
+            if(pins){
+                GPIO_InitStructure.GPIO_Pin = pins;
+                GPIO_Init(GPIOB, &GPIO_InitStructure);
+            }
         }
     }
+    
     if(config->RCC_Periph & RCC_APB2Periph_TIM1)
         RCC_APB2PeriphClockCmd(config->RCC_Periph, ENABLE);
     else

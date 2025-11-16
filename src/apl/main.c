@@ -9,14 +9,15 @@ JY61P_Data_t jy61pData_Read = { 0 };
 int main()
 {
     SysManager_Init();
+    
 
     while(1){
         // 状态机驱动部分
         SysManager_Process();               // 系统管理
         if(System_Is_Ready()){
             BlueTooth_Process();            // 蓝牙通信
-            VisionProtocol_Process();       // 视觉通信+++
-            Servo_SetCCR(SERVO_JOINT_1, 1000);
+            VisionProtocol_Process();       // 视觉通信
+            Arm_Process();                  // 机械臂控制
         }
 
         // 时间片轮转部分

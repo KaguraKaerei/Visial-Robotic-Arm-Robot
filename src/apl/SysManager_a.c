@@ -66,6 +66,8 @@ bool System_Is_Ready(void)
  */
 static void SysManager_InitHardware(void)
 {
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+
     LED_Init();
     LED_On();
 
@@ -74,7 +76,7 @@ static void SysManager_InitHardware(void)
 
     // 串口通信
     iUSART_Init(iUSART1, USART_MODE_BASIC);     // 蓝牙
-    iUSART_Init(iUSART2, USART_MODE_BASIC);     // 云台
+    iUSART_Init(iUSART2, USART_MODE_BASIC);     // 视觉
     iUSART_Init(iUSART3, USART_MODE_BASIC);     // 底盘
 
     // 定时器初始化
@@ -98,4 +100,6 @@ static void SysManager_InitModules(void)
     VisionProtocol_Init();
     // 舵机
     Servo_Init();
+    // 机械臂运动学
+    Arm_Kinematics_Init();
 }
