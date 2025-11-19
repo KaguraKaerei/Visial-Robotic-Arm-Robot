@@ -19,13 +19,20 @@
 #define CCR_MIN             500
 #define CCR_MAX             2500
 
-#define AIM_POINT_X         1052
-#define AIM_POINT_Y         591
+// #define AIM_POINT_X         1052
+// #define AIM_POINT_Y         591
+#define AIM_POINT_X         960
+#define AIM_POINT_Y         540
 #define LASER_POINT_X       960
-#define LASER_POINT_Y       520
+#define LASER_POINT_Y       540
 
-#define PIXEL_TO_ANGLE_YAW    0.032f     // 1像素 : 0.05度底座旋转
-#define PIXEL_TO_ANGLE_PITCH  0.018f    // 1像素 : 0.03度俯仰调整
+// 目标像素到角度的转换比例
+#define PIXEL_TO_ANGLE_YAW_TARGET    0.010f        // 1像素 : 0.010度底座旋转
+#define PIXEL_TO_ANGLE_PITCH_TARGET  0.005f        // 1像素 : 0.005度俯仰调整
+
+// 标靶像素到角度的转换比例
+#define PIXEL_TO_ANGLE_YAW_LASER    0.002f      // 1像素 : 0.006度底座旋转
+#define PIXEL_TO_ANGLE_PITCH_LASER  0.001f      // 1像素 : 0.001度俯仰调整
 
 // TODO: 角度范围表，确定上下限关节角和初始角
 typedef struct{
@@ -38,7 +45,7 @@ typedef struct{
 
 // 最小ccr对应角、最大ccr对应角、初始角、最小限制角、最大限制角
 static AngleRange_t angle_range = {
-    .chassis = {-135.0f, 135.0f, 0.0f},         // 500 ~ -135, 2500 ~ 135
+    .chassis = {-135.0f, 135.0f, 0.0f},         // 50   0 ~ -135, 2500 ~ 135
     .joint1 = {225.0f, -45.0f, 15.0f},          // 500 ~ 225, 2500 ~ -45
     .joint2 = {45.0f, 315.0f, 315.0f},          // 500 ~ 45, 2500 ~ 315
     .joint3 = {315.0f, 45.0f, 270.0f},          // 500 ~ 315, 2500 ~ 45
@@ -81,6 +88,9 @@ bool Arm_AimAtTarget(Coord_2D_t target, bool use_laser)
         offset_x = target.r - AIM_POINT_X;
         offset_y = target.z - AIM_POINT_Y;
     }
+    
+    // 判断是否瞄准
+    if(fabsf(offset_x) < 25.0f && fabsf(offset_y) < 25.0f) return true;
 
     // 获取当前关节角
     float theta0 = Arm_GetJointAngle(SERVO_CHASSIS);
@@ -88,9 +98,13 @@ bool Arm_AimAtTarget(Coord_2D_t target, bool use_laser)
 
     // 计算角度增量（像素偏差 × 增益）
     // offset_x > 0 表示目标在右侧，需向右转（theta0减小）
-    float delta_theta0 = offset_x * PIXEL_TO_ANGLE_YAW;
+    float delta_theta0;
+    if(use_laser) delta_theta0 = offset_x * PIXEL_TO_ANGLE_YAW_LASER;
+    else delta_theta0 = offset_x * PIXEL_TO_ANGLE_YAW_TARGET;
     // offset_y > 0 表示目标在下方，需俯仰向下（theta3减小）
-    float delta_theta3 = offset_y * PIXEL_TO_ANGLE_PITCH;
+    float delta_theta3;
+    if(use_laser) delta_theta3 = offset_y * PIXEL_TO_ANGLE_PITCH_LASER;
+    else delta_theta3 = offset_y * PIXEL_TO_ANGLE_PITCH_TARGET;
 
     // 更新关节角（增量调整）
     float theta0_new = theta0 - delta_theta0;
@@ -102,7 +116,7 @@ bool Arm_AimAtTarget(Coord_2D_t target, bool use_laser)
     bool res1 = Arm_SetJointAngle(SERVO_CHASSIS, theta0_new);
     bool res2 = Arm_SetJointAngle(SERVO_JOINT_3, theta3_new);
 
-    return res1 && res2;
+    return false;
 }
 
 /**
@@ -242,9 +256,12 @@ static uint16_t AngleToCCR(float angle, float angle_of_min_ccr, float angle_of_m
 {
     float angle_range = angle_of_max_ccr - angle_of_min_ccr;
     if(fabsf(angle_range) < 1e-6f) return CCR_MIN;
+    
     float t = (angle - angle_of_min_ccr) / angle_range;
-    float ccr = (float)CCR_MIN + t * (float)(CCR_MAX - CCR_MIN);
-    ccr = (uint16_t)_constrain(ccr + 0.5f, CCR_MIN, CCR_MAX);
+    float ccr_float = (float)CCR_MIN + t * (float)(CCR_MAX - CCR_MIN);
+    
+    int32_t ccr_int = (int32_t)(ccr_float + 0.5f);
+    uint16_t ccr = (uint16_t)_constrain(ccr_int, CCR_MIN, CCR_MAX);
 
     return ccr;
 }

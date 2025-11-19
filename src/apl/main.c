@@ -9,7 +9,6 @@ JY61P_Data_t jy61pData_Read = { 0 };
 int main()
 {
     SysManager_Init();
-    
 
     while(1){
         // 状态机驱动部分

@@ -22,7 +22,6 @@ static void VisionProtocol_Parse(const char* cmd);
 void VisionProtocol_Init(void)
 {
     USART_RegisterCallback(iUSART2, VisionProtocol_RX_Callback);
-    _INFO("VisionProtocol_Init: Vision protocol initialized");
 }
 
 void VisionProtocol_Process(void)

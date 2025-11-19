@@ -28,6 +28,8 @@ void SysManager_Init(void)
     sysState = SYS_STATE_RUNNING;
     sysReady = true;
     LED_Off();
+    Delay_s(1);
+    _INFO("SysManager_Init: System initialized successfully");
 }
 
 /**
