@@ -1,11 +1,13 @@
 #include "s_Kinematics.h"
 #include "Servo_d.h"
+#include "PID_s.h"
 #include <math.h>
 #include <stdio.h>
 
 /* ========================= 接 口 变 量 声 明 ========================= */
 
-
+PID_Param_t aim_pid_yaw = { 0 };
+PID_Param_t aim_pid_pitch = { 0 };
 
 /* ========================= 私 有 变 量 声 明 ========================= */
 
@@ -21,10 +23,10 @@
 
 // #define AIM_POINT_X         1052
 // #define AIM_POINT_Y         591
-#define AIM_POINT_X         960
-#define AIM_POINT_Y         540
-#define LASER_POINT_X       960
-#define LASER_POINT_Y       540
+#define AIM_POINT_X         320
+#define AIM_POINT_Y         180
+#define LASER_POINT_X       320
+#define LASER_POINT_Y       180
 
 // 目标像素到角度的转换比例
 #define PIXEL_TO_ANGLE_YAW_TARGET    0.010f        // 1像素 : 0.010度底座旋转
@@ -68,6 +70,12 @@ void Arm_Kinematics_Init(void)
     Arm_SetJointAngle(SERVO_JOINT_2, angle_range.joint2[2]);
     Arm_SetJointAngle(SERVO_JOINT_3, angle_range.joint3[2]);
     Arm_SetJointAngle(SERVO_JOINT_GRIPPER, angle_range.gripper[2]);
+
+    // 初始化PID参数
+    PID_Init(&aim_pid_yaw);
+    PID_SetLimit(&aim_pid_yaw, 100.0f, 100.0f);
+    PID_Init(&aim_pid_pitch);
+    PID_SetLimit(&aim_pid_pitch, 100.0f, 100.0f);
 }
 
 /**
@@ -99,11 +107,17 @@ bool Arm_AimAtTarget(Coord_2D_t target, bool use_laser)
     // 计算角度增量（像素偏差 × 增益）
     // offset_x > 0 表示目标在右侧，需向右转（theta0减小）
     float delta_theta0;
-    if(use_laser) delta_theta0 = offset_x * PIXEL_TO_ANGLE_YAW_LASER;
+    if(use_laser){
+        PI_Controller(&aim_pid_yaw, target.r, LASER_POINT_X);
+        delta_theta0 = aim_pid_yaw.output;
+    }
     else delta_theta0 = offset_x * PIXEL_TO_ANGLE_YAW_TARGET;
     // offset_y > 0 表示目标在下方，需俯仰向下（theta3减小）
     float delta_theta3;
-    if(use_laser) delta_theta3 = offset_y * PIXEL_TO_ANGLE_PITCH_LASER;
+    if(use_laser){
+        PI_Controller(&aim_pid_pitch, target.z, LASER_POINT_Y);
+        delta_theta3 = aim_pid_pitch.output;
+    }
     else delta_theta3 = offset_y * PIXEL_TO_ANGLE_PITCH_TARGET;
 
     // 更新关节角（增量调整）

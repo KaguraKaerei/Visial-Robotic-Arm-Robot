@@ -1,5 +1,5 @@
 #include "PID_s.h"
-#include "LOG_s.h"
+#include "s_LOG.h"
 
 #define _constrain(val, min, max)  ((val) > (max) ? (max) : ((val) < (min) ? (min) : (val)))
 
@@ -110,6 +110,22 @@ void PID_Controller(PID_Param_t* const PID, float target, float actual, float dt
     // PID输出
     PID->output = PID->p * err + PID->i * PID->integral + PID->d * outDiff;
     _constrain(PID->output, -PID->outputLimit, PID->outputLimit);
+}
+/**
+ * @brief PI控制器
+ * @param PID 指向PID类实例的指针
+ * @param target 目标值
+ * @param actual 实际值
+ */
+void PI_Controller(PID_Param_t* const PID, float target, float actual)
+{
+    // 比例项
+    float err = target - actual;
+    // 积分项
+    PID->integral += err;
+    _constrain(PID->integral, -PID->intLimit, PID->intLimit);
+    // PID输出
+    PID->output = PID->p * err + PID->i * PID->integral;
 }
 /**
  * @brief 前馈PID控制器

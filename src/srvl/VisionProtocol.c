@@ -1,7 +1,7 @@
 #include "VisionProtocol.h"
 #include "UART.h"
 #include <string.h>
-#include "LOG_s.h"
+#include "s_LOG.h"
 #include "Chassis_d.h"
 #include "a_Arm.h"
 
@@ -116,13 +116,13 @@ static void VisionProtocol_Parse(const char* cmd)
         arm_state = ARM_FIND_TASK;
     }
     else if(sscanf(cmd, "$ARM:AIM_TARGET:%d,%d#", &target_x_pixel, &target_y_pixel) == 2){
-        arm_param.r = (float)(target_x_pixel * 1920 / 640);
-        arm_param.z = (float)(target_y_pixel * 1080 / 360);
+        arm_param.r = (float)(target_x_pixel);
+        arm_param.z = (float)(target_y_pixel);
         arm_state = ARM_STATE_AIM_TARGET;
     }
     else if(sscanf(cmd, "$ARM:AIM_LASER:%d,%d#", &target_x_pixel, &target_y_pixel) == 2){
-        arm_param.r = (float)(target_x_pixel * 1920 / 640);
-        arm_param.z = (float)(target_y_pixel * 1080 / 360);
+        arm_param.r = (float)(target_x_pixel);
+        arm_param.z = (float)(target_y_pixel);
         arm_state = ARM_STATE_AIM_LASER;
     }
     else if(sscanf(cmd, "$ARM:TARGET:%f#", &arm_param.depth) == 1){
