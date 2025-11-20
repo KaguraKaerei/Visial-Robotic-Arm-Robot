@@ -1,5 +1,5 @@
 #include "BlueTooth.h"
-#include "LOG_s.h"
+#include "s_LOG.h"
 #include "Delay_s.h"
 #include "UART.h"
 #include "LED_d.h"
@@ -80,6 +80,7 @@ static void BlueTooth_Callback(void)
     RingBuffer_Write(&btRingBuffer, &byte, 1, OVERWRITE);
 }
 
+#include "s_Kinematics.h"
 static void BlueTooth_Parse(const char* cmd)
 {
     float p, i, d;
@@ -133,6 +134,14 @@ static void BlueTooth_Parse(const char* cmd)
         temptemptemp = targetangle;
     } else if (strcmp(cmd, "$LAUNCH#") == 0) {
         //basicspeed = 3000;
+    else if(sscanf(cmd, "$PID:Kp:%f#", &p) == 1){
+        aim_pid_yaw.p = p;
+    }
+    else if(sscanf(cmd, "$PID:Ki:%f#", &i) == 1){
+        aim_pid_yaw.i = i;
+    }
+    else if(sscanf(cmd, "$PID:Kd:%f#", &d) == 1){
+        aim_pid_yaw.d = d;
     }
 
     else if (sscanf(cmd, "$SERVO:CCR:%hu#", &servoCCR) == 1) {

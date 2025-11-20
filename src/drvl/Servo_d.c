@@ -67,10 +67,10 @@ uint16_t Servo_GetCCR(Servo_ID_t servo_id)
             ccr = TIM3->CCR2;
             break;
         case SERVO_JOINT_3:
-            ccr = TIM3->CCR3;
+            ccr = TIM3->CCR4;
             break;
         case SERVO_JOINT_GRIPPER:
-            ccr = TIM3->CCR4;
+            ccr = TIM3->CCR3;   
             break;
         default:
             break;

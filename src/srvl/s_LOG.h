@@ -1,5 +1,5 @@
-#ifndef _LOG_s_H_
-#define _LOG_s_H_
+#ifndef _S_LOG_H_
+#define _S_LOG_H_
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -12,6 +12,7 @@
   */
 #define LOG_DEBUG 3
 
+void _WavePrintf(int count, ...);
 void _INFO(const char* format, ...) __attribute__((format(printf, 1, 2)));
 void _WARN(const char* format, ...) __attribute__((format(printf, 1, 2)));
 void _ERROR(const char* format, ...) __attribute__((format(printf, 1, 2)));

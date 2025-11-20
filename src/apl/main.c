@@ -23,23 +23,28 @@ int main()
         }
 
         // 时间片轮转部分
-        if(sysTick_DelayMs(&infoDelayer, 1)){
-            // Chassis_GetData(&chassisParam);
-            printfcnt++;
-            if (printfcnt > 100) // 100ms
-            {
-                printfcnt = 0;
-                //_INFO("datafromopenmvis %d",VisionProtocol_Getopenmvdata());
-            }
-            closecnt++;
-            if (closecnt > 10) // 10ms
-            {
-                closecnt = 0;
-                Chassis_closeloop_Move();
-                _INFO("angle:%f\n", jy61pdata.angle_z);
-        		_INFO("datafromopenmvis %d", VisionProtocol_Getopenmvdata());
-                /* _INFO("targetangle:%f\n",totaltargerangle); */
-            }
+//         if(sysTick_DelayMs(&infoDelayer, 1)){
+//             // Chassis_GetData(&chassisParam);
+//             printfcnt++;
+//             if (printfcnt > 100) // 100ms
+//             {
+//                 printfcnt = 0;
+//                 //_INFO("datafromopenmvis %d",VisionProtocol_Getopenmvdata());
+//             }
+//             closecnt++;
+//             if (closecnt > 10) // 10ms
+//             {
+//                 closecnt = 0;
+//                 Chassis_closeloop_Move();
+//                 _INFO("angle:%f\n", jy61pdata.angle_z);
+//         		_INFO("datafromopenmvis %d", VisionProtocol_Getopenmvdata());
+//                 /* _INFO("targetangle:%f\n",totaltargerangle); */
+//             }
+//         }
+        if(sysTick_DelayMs(&infoDelayer, 10)){
+            float target_r = 960.0f;
+            float target_z = 540.0f;
+            _WavePrintf(4, &target_r, &target_z, &arm_param.r, &arm_param.z);
         }
         if(DWT_DelayUs(&yawDelayer, 100)){
 
