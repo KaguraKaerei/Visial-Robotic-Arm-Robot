@@ -40,8 +40,9 @@ void SysManager_Process(void)
     switch(sysState){
         case SYS_STATE_RUNNING:
             // 系统正常运行
-
-            break;
+			
+            
+			break;
 
         case SYS_STATE_ERROR:
             _ERROR("System in error state!");
@@ -91,7 +92,8 @@ static void SysManager_InitModules(void)
 {
     // 底盘
     Chassis_Init();
-    Chassis_SelfCtrl_Init();
+    //Chassis_SelfCtrl_Init();
+    Chassis_closeloop_Init();
     // 蓝牙
     BlueTooth_Init();
     // 陀螺仪

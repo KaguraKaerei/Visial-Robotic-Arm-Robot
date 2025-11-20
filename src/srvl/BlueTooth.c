@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "a_Arm.h"
+#include "a_Chassis_closeloop.h"
 
 /* ========================= 私 有 变 量 声 明 ========================= */
 
@@ -85,6 +86,7 @@ static void BlueTooth_Parse(const char* cmd)
     int speed, angle, angularVel;
     int dataInfoFlag = 0;
     uint16_t servoCCR;
+    int targetangle;
 
     if(!cmd){
         _WARN("BlueTooth_Parse: cmd is NULL");
@@ -123,21 +125,23 @@ static void BlueTooth_Parse(const char* cmd)
             chassisParam.encorder10ms[2], chassisParam.encorderSpeed[2],
             chassisParam.encorder10ms[3], chassisParam.encorderSpeed[3]);
     }
-    else if(sscanf(cmd, "$PID:%f,%f,%f", &p, &i, &d) == 3){
-        jy61pYawPID.p = p;
-        jy61pYawPID.i = i;
-        jy61pYawPID.d = d;
+    else if(sscanf(cmd, "$PID:%f,%f,%f#", &p, &i, &d) == 3){
+        anglepid.p    = p;
+        anglepid.i    = i;
+        anglepid.d    = d;
+    } else if (sscanf(cmd, "$TARGETANGLE:%d#", &targetangle) == 1) {
+        temptemptemp = targetangle;
+    } else if (strcmp(cmd, "$LAUNCH#") == 0) {
+        //basicspeed = 3000;
     }
-    else if(sscanf(cmd, "$SERVO:CCR:%hu#", &servoCCR) == 1){
+
+    else if (sscanf(cmd, "$SERVO:CCR:%hu#", &servoCCR) == 1) {
         Servo_SetCCR(SERVO_CHASSIS, servoCCR);
-    }
-    else if(sscanf(cmd, "$ARM:ANY:%f,%f,%f,%f#", &arm_param.x, &arm_param.y, &arm_param.z, &arm_param.angle) == 4){
+    } else if (sscanf(cmd, "$ARM:ANY:%f,%f,%f,%f#", &arm_param.x, &arm_param.y, &arm_param.z, &arm_param.angle) == 4) {
         arm_state = ARM_STATE_ANY;
-    }
-    else if(strcmp(cmd, "$ARM:END#") == 0){
+    } else if (strcmp(cmd, "$ARM:END#") == 0) {
         arm_state = ARM_STATE_END;
-    }
-    else{
+    } else {
         _WARN("BlueTooth_Parse: Unknown command '%s'", cmd);
     }
 }

@@ -23,7 +23,7 @@ void Arm_Process(void)
 
     switch(arm_state){
         case ARM_STATE_IDLE:
-            USART_Printf(USART2, "$ARM:IDLE#");
+            //USART_Printf(USART2, "$ARM:IDLE#");
             break;
         case ARM_FIND_QR:
             // 寻找二维码期间保持不变, 直到找到二维码后会收到信息切换到ARM_FIND_TASK状态

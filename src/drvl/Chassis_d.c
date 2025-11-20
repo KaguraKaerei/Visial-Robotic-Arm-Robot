@@ -36,23 +36,34 @@ void Chassis_Init(void)
     USART_Printf(USART3, "$mphase:56#");        // 减速比
     USART_Printf(USART3, "$wdiameter:85#");     // 轮子直径
 
-    PID_Init(&jy61pYawPID);
-    PID_SetPID(&jy61pYawPID, 2.0f, 0.01f, 0.5f);
+    Delay_ms(1000);
+
+    chassisParam.speed[CHASSIS_WHEEL_LF] = 0;
+    chassisParam.speed[CHASSIS_WHEEL_RF] = 0;
+    chassisParam.speed[CHASSIS_WHEEL_LR] = 0;
+    chassisParam.speed[CHASSIS_WHEEL_RR] = 0;
+    Chassis_SetSpeed(&chassisParam);
+
+ /*    PID_Init(&jy61pYawPID);
+    PID_SetPID(&jy61pYawPID, 2.0f, 0.01f, 0.5f); */
 }
 /**
  * @brief 设置底盘速度
  * @param param 底盘参数结构体指针
  */
-void Chassis_SetSpeed(const ChassisParam_t* const param)
+void Chassis_SetSpeed(/* const  */ChassisParam_t* const param)
 {
     if(!param){
         _WARN("Chassis_SetSpeed: param is NULL");
         return;
     }
+/*     param->speed[CHASSIS_WHEEL_LR] = -param->speed[CHASSIS_WHEEL_LR]; // 修正反向问题
+    param->speed[CHASSIS_WHEEL_RR] = -param->speed[CHASSIS_WHEEL_RR]; */
+
     USART_Printf(USART3, "$spd:%d,%d,%d,%d#", param->speed[CHASSIS_WHEEL_LF],
-        -param->speed[CHASSIS_WHEEL_RF],
-        -param->speed[CHASSIS_WHEEL_LR],
-        param->speed[CHASSIS_WHEEL_RR]);
+                 -param->speed[CHASSIS_WHEEL_RF],
+                 -param->speed[CHASSIS_WHEEL_LR],
+                 param->speed[CHASSIS_WHEEL_RR]);
 }
 /**
  * @brief 设置底盘PWM
@@ -378,8 +389,8 @@ static void Chassis_DifferentialIK(ChassisParam_t* const param)
     leftVel = leftVel > CHASSIS_MAX_SPEED ? CHASSIS_MAX_SPEED : (leftVel < -CHASSIS_MAX_SPEED ? -CHASSIS_MAX_SPEED : leftVel);
     rightVel = rightVel > CHASSIS_MAX_SPEED ? CHASSIS_MAX_SPEED : (rightVel < -CHASSIS_MAX_SPEED ? -CHASSIS_MAX_SPEED : rightVel);
     // TODO： cm/s 转换为 车板单位+补偿系数
-    leftVel *= 30;
-    rightVel *= 30;
+/*     leftVel *= 30;
+    rightVel *= 30; */
     // 写入数据(cm/s -> 车板单位+补偿系数)
     param->speed[CHASSIS_WHEEL_LF] = (int)leftVel;
     param->speed[CHASSIS_WHEEL_RF] = (int)rightVel;

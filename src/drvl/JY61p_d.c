@@ -35,7 +35,7 @@ uint8_t JY61p_ReadReg(uint8_t RegAddress)
 }
 
 /* JY61p指定地址读指定个字节 */
-void JY61p_ReadReg_Mul(uint8_t RegAddress, uint8_t* data, uint8_t len)
+void JY61p_ReadReg_Mul(uint8_t RegAddress, uint8_t *data, uint8_t len)
 {
     uint8_t i;
     JY61p_I2C_Start();
@@ -46,12 +46,11 @@ void JY61p_ReadReg_Mul(uint8_t RegAddress, uint8_t* data, uint8_t len)
     JY61p_I2C_Start();
     JY61p_I2C_SendByte(JY61P_ADDRESS << 1 | 0x01); // 从机地址读
     JY61p_I2C_ReceiveAck();
-    for(i = 0; i < len; i++){
+    for (i = 0; i < len; i++) {
         data[i] = JY61p_I2C_ReceiveByte();
-        if(i < len - 1){
+        if (i < len - 1) {
             JY61p_I2C_SendAck(ACK);
-        }
-        else{
+        } else {
             JY61p_I2C_SendAck(NACK); // 发送非应答，从机停止发送数据
         }
     }
@@ -80,11 +79,13 @@ uint8_t JY61p_Init(void)
 }
 
 /* 传入结构体指针，获取JY61p的各项数据 */
-void JY61p_GetData(JY61P_Data_t* data)
+void JY61p_GetData(JY61P_Data_t *data)
 {
     uint8_t data_acc[6];
     uint8_t data_gyro[6];
     uint8_t data_angle[6];
+
+    static float lastangle_z = 0;
 
     JY61p_ReadReg_Mul(JY61P_ACC_X_L, data_acc, 6);
     JY61p_ReadReg_Mul(JY61P_GYRO_X_L, data_gyro, 6);
@@ -104,4 +105,25 @@ void JY61p_GetData(JY61P_Data_t* data)
     data->angle_x = ((int16_t)((data_angle[1] << 8) | data_angle[0])) / 32768.0f * 180.0f;
     data->angle_y = ((int16_t)((data_angle[3] << 8) | data_angle[2])) / 32768.0f * 180.0f;
     data->angle_z = ((int16_t)((data_angle[5] << 8) | data_angle[4])) / 32768.0f * 180.0f;
+
+    // ===== replace jump handling with proper unwrapping =====
+    static float last_raw_z  = 0.0f;
+    static float unwrapped_z = 0.0f;
+
+    float raw_z = data->angle_z; // raw in -180..180 from sensor
+    float delta = raw_z - last_raw_z;
+
+    // 把 delta 约束到 (-180, 180]
+    if (delta > 180.0f) {
+        delta -= 360.0f;
+    } else if (delta <= -180.0f) {
+        delta += 360.0f;
+    }
+
+    unwrapped_z += delta; // 累加得到连续角度（可超出±180）
+    data->angle_z = unwrapped_z;
+
+    last_raw_z = raw_z;
+    // =======================================================
+    // ...existing code...
 }

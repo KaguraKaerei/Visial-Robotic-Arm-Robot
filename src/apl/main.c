@@ -6,10 +6,12 @@ static uint32_t yawDelayer = 0;
 
 JY61P_Data_t jy61pData_Read = { 0 };
 
+uint16_t printfcnt = 0;
+uint16_t closecnt = 0;
+
 int main()
 {
     SysManager_Init();
-    
 
     while(1){
         // 状态机驱动部分
@@ -21,9 +23,23 @@ int main()
         }
 
         // 时间片轮转部分
-        if(sysTick_DelayMs(&infoDelayer, 1000)){
+        if(sysTick_DelayMs(&infoDelayer, 1)){
             // Chassis_GetData(&chassisParam);
-
+            printfcnt++;
+            if (printfcnt > 100) // 100ms
+            {
+                printfcnt = 0;
+                //_INFO("datafromopenmvis %d",VisionProtocol_Getopenmvdata());
+            }
+            closecnt++;
+            if (closecnt > 10) // 10ms
+            {
+                closecnt = 0;
+                Chassis_closeloop_Move();
+                _INFO("angle:%f\n", jy61pdata.angle_z);
+        		_INFO("datafromopenmvis %d", VisionProtocol_Getopenmvdata());
+                /* _INFO("targetangle:%f\n",totaltargerangle); */
+            }
         }
         if(DWT_DelayUs(&yawDelayer, 100)){
 

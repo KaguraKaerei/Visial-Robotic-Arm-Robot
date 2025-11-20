@@ -23,6 +23,7 @@ void Servo_Init(void)
     TIM_SetCounter(TIM3, 0);
 }
 
+// 五个舵机PWM：TIM2: PA0(CH1)、PA1(CH2) ; TIM3: PA7(CH2)、PB0(CH3)、PB1(CH4)   20ms周期，0.5ms-2.5ms脉宽
 bool Servo_SetCCR(Servo_ID_t servo_id, uint16_t ccr)
 {
     bool res = true;
@@ -40,10 +41,10 @@ bool Servo_SetCCR(Servo_ID_t servo_id, uint16_t ccr)
             TIM_SetCompare2(TIM3, ccr);
             break;
         case SERVO_JOINT_3:
-            TIM_SetCompare3(TIM3, ccr);
+            TIM_SetCompare4(TIM3, ccr);
             break;
         case SERVO_JOINT_GRIPPER:
-            TIM_SetCompare4(TIM3, ccr);
+            TIM_SetCompare3(TIM3, ccr);
             break;
         default:
             break;

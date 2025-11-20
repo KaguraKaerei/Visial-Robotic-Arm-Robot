@@ -1,5 +1,6 @@
 #include "UART.h"
 #include <stdarg.h>
+#include "Chassis_d.h"
 
 #define NO_IRQn ((IRQn_Type)-1)
 
