@@ -33,7 +33,7 @@ extern PID_Param_t jy61pYawPID;
 /* ========================= 底 盘 接 口 函 数 声 明 ========================= */
 
 void Chassis_Init(void);
-void Chassis_SetSpeed(const ChassisParam_t* const param);
+void Chassis_SetSpeed(/* const */ ChassisParam_t* const param);
 void Chassis_SetPWM(const ChassisParam_t* const param);
 void Chassis_SetPID(const ChassisParam_t* const param);
 void Chassis_GetData(ChassisParam_t* const param);

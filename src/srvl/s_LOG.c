@@ -24,7 +24,7 @@
  */
 void _WavePrintf(int count, ...)
 {
-    printf(ANSI_COLOR_PURPLE "[WAVE] ");
+    printf("[WAVE] : ");
 
     va_list args;
     va_start(args, count);
@@ -36,7 +36,7 @@ void _WavePrintf(int count, ...)
     }
     va_end(args);
 
-    printf(ANSI_COLOR_RESET "\r\n");
+    printf("\r\n");
 }
 
 /**

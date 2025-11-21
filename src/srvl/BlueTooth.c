@@ -86,6 +86,7 @@ static void BlueTooth_Parse(const char* cmd)
     int speed, angle, angularVel;
     int dataInfoFlag = 0;
     uint16_t servoCCR;
+    int targetangle;
 
     if(!cmd){
         _WARN("BlueTooth_Parse: cmd is NULL");
@@ -131,7 +132,7 @@ static void BlueTooth_Parse(const char* cmd)
         aim_pid_yaw.i = i;
     }
     else if(sscanf(cmd, "$PID:Kd:%f#", &d) == 1){
-        aim_pid_yaw.d = d;
+        aim_pid_yaw.d = -d;
     }
     else if(sscanf(cmd, "$SERVO:CCR:%hu#", &servoCCR) == 1){
         Servo_SetCCR(SERVO_CHASSIS, servoCCR);

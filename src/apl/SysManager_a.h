@@ -24,6 +24,7 @@
 #include "s_Kinematics.h"
 // Application Layer
 #include "a_Arm.h"
+#include "a_Chassis_closeloop.h"
 
 // 系统状态定义
 typedef enum{

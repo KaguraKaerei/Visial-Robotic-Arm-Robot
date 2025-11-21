@@ -23,10 +23,10 @@ PID_Param_t aim_pid_pitch = { 0 };
 
 // #define AIM_POINT_X         1052
 // #define AIM_POINT_Y         591
-#define AIM_POINT_X         320
-#define AIM_POINT_Y         180
-#define LASER_POINT_X       320
-#define LASER_POINT_Y       180
+#define AIM_POINT_X         305
+#define AIM_POINT_Y         155
+#define LASER_POINT_X       305
+#define LASER_POINT_Y       155
 
 // 目标像素到角度的转换比例
 #define PIXEL_TO_ANGLE_YAW_TARGET    0.010f        // 1像素 : 0.010度底座旋转
@@ -48,9 +48,9 @@ typedef struct{
 // 最小ccr对应角、最大ccr对应角、初始角、最小限制角、最大限制角
 static AngleRange_t angle_range = {
     .chassis = {-135.0f, 135.0f, 0.0f},         // 50   0 ~ -135, 2500 ~ 135
-    .joint1 = {225.0f, -45.0f, 15.0f},          // 500 ~ 225, 2500 ~ -45
-    .joint2 = {45.0f, 315.0f, 315.0f},          // 500 ~ 45, 2500 ~ 315
-    .joint3 = {315.0f, 45.0f, 270.0f},          // 500 ~ 315, 2500 ~ 45
+    .joint1 = {225.0f, -45.0f, 165.0f},          // 500 ~ 225, 2500 ~ -45
+    .joint2 = {45.0f, 315.0f, 60.0f},          // 500 ~ 45, 2500 ~ 315
+    .joint3 = {315.0f, 45.0f, 100.0f},          // 500 ~ 315, 2500 ~ 45
     .gripper = {0.0f, 180.0f, 90.0f},           // 500 ~ 0, 2500 ~ 90
 };
 
@@ -73,9 +73,11 @@ void Arm_Kinematics_Init(void)
 
     // 初始化PID参数
     PID_Init(&aim_pid_yaw);
-    PID_SetLimit(&aim_pid_yaw, 100.0f, 100.0f);
+    PID_SetLimit(&aim_pid_yaw, 45.0f, 45.0f);
+    PID_SetPID(&aim_pid_yaw, 0.05f, 0.0001f, -0.0008f);
     PID_Init(&aim_pid_pitch);
-    PID_SetLimit(&aim_pid_pitch, 100.0f, 100.0f);
+    PID_SetLimit(&aim_pid_pitch, 45.0f, 45.0f);
+    PID_SetPID(&aim_pid_pitch, 0.05f, 0.0001f, -0.0008f);
 }
 
 /**
@@ -98,7 +100,7 @@ bool Arm_AimAtTarget(Coord_2D_t target, bool use_laser)
     }
     
     // 判断是否瞄准
-    if(fabsf(offset_x) < 25.0f && fabsf(offset_y) < 25.0f) return true;
+    if((fabsf(offset_x) < 25.0f) && (fabsf(offset_y) < 25.0f)) return true;
 
     // 获取当前关节角
     float theta0 = Arm_GetJointAngle(SERVO_CHASSIS);

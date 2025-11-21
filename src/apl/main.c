@@ -20,9 +20,10 @@ int main()
         }
 
         // 时间片轮转部分
-        if(sysTick_DelayMs(&infoDelayer, 10)){
-            float target_r = 960.0f;
-            float target_z = 540.0f;
+        if(sysTick_DelayMs(&infoDelayer, 100)){
+            // printf("live\r\n");
+            float target_r = 305.0f;
+            float target_z = 155.0f;
             _WavePrintf(4, &target_r, &target_z, &arm_param.r, &arm_param.z);
         }
         if(DWT_DelayUs(&yawDelayer, 100)){

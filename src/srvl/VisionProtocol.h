@@ -1,6 +1,8 @@
 #ifndef _VISIONPROTOCOL_H_
 #define _VISIONPROTOCOL_H_
 
+#include "stm32f10x.h"
+
 typedef enum{
     VISION_STATE_IDLE = 0,
     VISION_STATE_GO,
@@ -12,5 +14,6 @@ typedef enum{
 
 void VisionProtocol_Init(void);
 void VisionProtocol_Process(void);
+int VisionProtocol_Getopenmvdata(void);
 
 #endif

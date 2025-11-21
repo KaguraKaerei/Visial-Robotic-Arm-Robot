@@ -126,6 +126,7 @@ void PI_Controller(PID_Param_t* const PID, float target, float actual)
     _constrain(PID->integral, -PID->intLimit, PID->intLimit);
     // PID输出
     PID->output = PID->p * err + PID->i * PID->integral;
+    _constrain(PID->output, -PID->outputLimit, PID->outputLimit);
 }
 /**
  * @brief 前馈PID控制器

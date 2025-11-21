@@ -11,6 +11,7 @@ static VisionState_t visionState = VISION_STATE_IDLE;
 static char res[64] = { 0 };
 static uint8_t index = 0;
 static uint8_t receiving = 0;
+static int deviation = 0;
 
 /* ========================= 私 有 函 数 声 明 ========================= */
 
@@ -52,6 +53,11 @@ void VisionProtocol_Process(void)
     }
 }
 
+int VisionProtocol_Getopenmvdata(void)
+{
+    return deviation;
+}
+
 /* ========================= 私 有 函 数 实 现 ========================= */
 
 static void VisionProtocol_RX_Callback(void)
@@ -70,7 +76,7 @@ static void VisionProtocol_RX_Callback(void)
                 res[index] = '\0';
                 receiving = 0;
                 // 处理命令
-                printf("Received command: %s\n", res);
+                // printf("Received command: %s\n", res);
                 VisionProtocol_Parse(res);
                 index = 0;
             }
@@ -92,12 +98,16 @@ static void VisionProtocol_RX_Callback(void)
 static void VisionProtocol_Parse(const char* cmd)
 {
     int target_x_pixel, target_y_pixel;
+    int track_data;
 
     if(!cmd){
         _WARN("VisionProtocol_Parse: cmd is NULL");
         return;
     }
-    if(strcmp(cmd, "$TRACK:GO#") == 0){
+    if(sscanf(cmd, "$TRACK:%d", &track_data) == 1){
+        deviation = track_data;
+    }
+    else if(strcmp(cmd, "$TRACK:GO#") == 0){
         visionState = VISION_STATE_GO;
     }
     else if(strcmp(cmd, "$TRACK:STOP#") == 0){
@@ -130,7 +140,7 @@ static void VisionProtocol_Parse(const char* cmd)
     }
     else if(strcmp(cmd, "$ARM:GRASPING#") == 0){
         // TODO: 抓取目标物移动到指定位置：分不同任务情况
-        
+
         arm_state = ARM_STATE_GRASPING;
     }
     else if(strcmp(cmd, "$ARM:PUT_IN#") == 0){

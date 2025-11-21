@@ -350,7 +350,7 @@ targets:
       OpenOCD:
         baseAddr: "0x08000000"
         bin: ""
-        interface: stlink
+        interface: cmsis-dap
         target: stm32f1x
       STLink:
         address: "0x8000000"

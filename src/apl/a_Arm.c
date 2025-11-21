@@ -27,13 +27,13 @@ void Arm_Process(void)
         case ARM_FIND_QR:
         {
             // 寻找二维码期间保持不变, 直到找到二维码后会收到信息切换到ARM_FIND_TASK状态
-            Arm_InverseKinematics(0.0f, -0.10f, 0.10f, -30.0f);
+            Arm_InverseKinematics(0.0f, 0.10f, 0.10f, -30.0f);
             break;
         }
         case ARM_FIND_TASK:
         {
             // 寻找任务期间保持不变, 直到找到任务物体后会切换到对应的任务状态
-            Arm_InverseKinematics(0.0f, 0.10f, 0.10f, -30.0f);
+            Arm_InverseKinematics(0.0f, -0.10f, 0.10f, -20.0f);
             break;
         }
         case ARM_STATE_AIM_TARGET:
@@ -85,7 +85,6 @@ void Arm_Process(void)
         {
             res = Arm_InverseKinematics(arm_param.x, arm_param.y, arm_param.z, arm_param.angle);
             if(res) USART_Printf(USART2, "$ARM:ANY_OK#");
-            else USART_Printf(USART2, "$ARM:ANY_ERR#");
             arm_state = ARM_STATE_IDLE;
             break;
         }
